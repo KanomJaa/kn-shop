@@ -1,0 +1,250 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดสินค้า - KN Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><a href="/index.html"><i class="fa-solid fa-gamepad"></i> <span>KN Shop</span></a></div>
+            <ul class="nav-links">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><a href="/pages/topup.html"><i class="fa-solid fa-coins"></i> เติมเงิน</a></li>
+                <li><a href="/index.html#categories"><i class="fa-solid fa-store"></i> สินค้า</a></li>
+            </ul>
+            <div class="auth-buttons"></div>
+        </div>
+    </nav>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span></li>
+                <li><a href="/pages/gamepass.html"><i class="fa-solid fa-folder"></i> หมวดหมู่ทั้งหมด</a></li>
+                <li><span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span></li>
+                <li class="active"><span id="breadcrumbCurrent">รายละเอียดสินค้า</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container" style="padding: 40px 20px;">
+        <div class="product-detail-container">
+            <div class="product-detail-image">
+                <div id="p-img-container">
+                    <div class="placeholder-img large" id="p-img">Loading...</div>
+                </div>
+                <div id="avg-rating" style="text-align:center; margin-top:15px; font-size:16px;"></div>
+            </div>
+            <div class="product-detail-info">
+                <h1 class="product-title" id="p-title">กำลังโหลดสินค้า...</h1>
+                <p class="product-price" id="p-price">฿0</p>
+                <div class="product-description">
+                    <p><strong>รายละเอียดสินค้า:</strong></p>
+                    <ul id="p-desc">
+                        <li>กำลังโหลดข้อมูล...</li>
+                    </ul>
+                </div>
+                <div id="stock-status"></div>
+                <div class="purchase-form" id="purchaseForm">
+                    <div class="form-group">
+                        <label>Username Roblox</label>
+                        <input type="text" id="robloxUser" placeholder="กรอก Username Roblox ของคุณ">
+                        <div id="usernameWarning"
+                            style="display:none; color:#c62828; font-size:13px; margin-top:6px; font-weight:500;">
+                            <i class="fa-solid fa-exclamation-triangle"></i> กรุณาตั้ง Username Roblox ใน <a
+                                href="/pages/profile.html"
+                                style="color:#c62828; text-decoration:underline !important; font-weight:700;">โปรไฟล์</a>
+                            ก่อนสั่งซื้อ
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>จำนวน</label>
+                        <input type="number" id="itemQty" value="1" min="1" max="10">
+                    </div>
+                    <button class="btn-submit" onclick="addToCart()" style="font-size:1.1rem; margin-bottom:10px;">
+                        <i class="fa-solid fa-cart-plus"></i> เพิ่มลงตะกร้า
+                    </button>
+                    <button class="btn-submit" onclick="buyNow()" style="font-size:1.1rem; background:#0277bd;">
+                        <i class="fa-solid fa-bolt"></i> ซื้อเลย
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section" id="reviewsSection">
+            <h3 style="margin-bottom:20px;"><i class="fa-solid fa-star"></i> รีวิวจากผู้ซื้อ</h3>
+            <div id="reviewFormArea"></div>
+            <div id="reviewsList"></div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        let currentProduct = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!productId) { showNotFound(); return; }
+
+            const data = await KNShop.getProduct(productId);
+            if (!data.success || !data.product) { showNotFound(); return; }
+
+            currentProduct = data.product;
+            document.getElementById('p-title').textContent = currentProduct.title;
+            document.getElementById('p-price').textContent = currentProduct.price.toLocaleString() + ' P';
+            document.title = currentProduct.title + ' - KN Shop';
+
+            // Image
+            if (currentProduct.image) {
+                document.getElementById('p-img-container').innerHTML = `<img src="${currentProduct.image}" alt="${currentProduct.title}" style="max-width:100%; border-radius:12px;">`;
+            } else {
+                document.getElementById('p-img').textContent = currentProduct.imgLabel || currentProduct.title;
+            }
+
+            // Description
+            const descList = document.getElementById('p-desc');
+            if (currentProduct.description) {
+                const items = currentProduct.description.split('•').map(s => s.trim()).filter(Boolean);
+                descList.innerHTML = items.map(item => '<li>' + item + '</li>').join('');
+            }
+
+            // Stock status
+            if (!currentProduct.inStock || !currentProduct.isActive) {
+                document.getElementById('stock-status').innerHTML = '<p style="color:#c62828; font-weight:600; margin:10px 0;"><i class="fa-solid fa-times-circle"></i> สินค้าหมดชั่วคราว</p>';
+                document.getElementById('purchaseForm').style.display = 'none';
+            }
+
+            // Rating
+            if (data.reviewCount > 0) {
+                let stars = '';
+                for (let i = 1; i <= 5; i++) stars += `<i class="fa-solid fa-star" style="color:${i <= Math.round(data.avgRating) ? '#ffc107' : '#e0e0e0'};"></i>`;
+                document.getElementById('avg-rating').innerHTML = `${stars} <span style="font-weight:600;">${data.avgRating}</span> <span style="color:#999;">(${data.reviewCount} รีวิว)</span>`;
+            } else {
+                document.getElementById('avg-rating').innerHTML = '<span style="color:#999;">ยังไม่มีรีวิว</span>';
+            }
+
+            // Auto-fill Roblox Username from profile
+            await autoFillRobloxUsername();
+
+            // Reviews
+            renderReviewForm();
+            renderReviews(data.reviews || []);
+        });
+
+        async function autoFillRobloxUsername() {
+            if (!KNShop.isLoggedIn()) return;
+            const user = await KNShop.getCurrentUser();
+            if (user && user.robloxUsername) {
+                document.getElementById('robloxUser').value = user.robloxUsername;
+                const warning = document.getElementById('usernameWarning');
+                if (warning) warning.style.display = 'none';
+            } else {
+                // Show warning if no username set
+                const warning = document.getElementById('usernameWarning');
+                if (warning) warning.style.display = 'block';
+            }
+        }
+
+        function validateUsername() {
+            const roblox = document.getElementById('robloxUser').value.trim();
+            if (!roblox) {
+                KNShop.showToast('กรุณาใส่ Username Roblox ก่อนสั่งซื้อ', 'error');
+                document.getElementById('robloxUser').focus();
+                document.getElementById('robloxUser').style.borderColor = '#c62828';
+                document.getElementById('robloxUser').style.boxShadow = '0 0 0 3px rgba(198,40,40,0.15)';
+                setTimeout(() => {
+                    document.getElementById('robloxUser').style.borderColor = '';
+                    document.getElementById('robloxUser').style.boxShadow = '';
+                }, 3000);
+                return false;
+            }
+            return true;
+        }
+
+        function showNotFound() {
+            document.getElementById('p-title').textContent = 'ไม่พบสินค้า';
+            document.getElementById('p-price').textContent = '-';
+            document.getElementById('p-img').textContent = '?';
+            document.getElementById('purchaseForm').style.display = 'none';
+            document.getElementById('reviewsSection').style.display = 'none';
+        }
+
+        function addToCart() {
+            if (!KNShop.isLoggedIn()) { window.location.href='/pages/login.html'; return; }
+            if (!validateUsername()) return;
+            const roblox = document.getElementById('robloxUser').value.trim();
+            const qty = parseInt(document.getElementById('itemQty').value) || 1;
+            const result = KNShop.addToCart(productId, qty, roblox, currentProduct.title, currentProduct.price, currentProduct.imgLabel);
+            KNShop.showToast(result.msg);
+        }
+
+        function buyNow() {
+            if (!KNShop.isLoggedIn()) { window.location.href='/pages/login.html'; return; }
+            if (!validateUsername()) return;
+            const roblox = document.getElementById('robloxUser').value.trim();
+            const qty = parseInt(document.getElementById('itemQty').value) || 1;
+            KNShop.addToCart(productId, qty, roblox, currentProduct.title, currentProduct.price, currentProduct.imgLabel);
+            window.location.href='/pages/cart.html';
+        }
+
+        function renderReviewForm() {
+            const area = document.getElementById('reviewFormArea');
+            if (!KNShop.isLoggedIn()) {
+                area.innerHTML = '<p style="color:#999; font-size:14px; margin-bottom:20px;"><a href="/pages/login.html" style="color:var(--primary-color);">เข้าสู่ระบบ</a> เพื่อเขียนรีวิว</p>';
+                return;
+            }
+            area.innerHTML = `
+                <div class="review-form" style="margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid #f0f0f0;">
+                    <div class="star-input" id="starInput">
+                        <label onclick="setRating(1)">★</label><label onclick="setRating(2)">★</label><label onclick="setRating(3)">★</label><label onclick="setRating(4)">★</label><label onclick="setRating(5)">★</label>
+                    </div>
+                    <textarea id="reviewComment" placeholder="เขียนรีวิวของคุณ..."></textarea>
+                    <button class="btn-submit" onclick="submitReview()" style="max-width:200px;"><i class="fa-solid fa-paper-plane"></i> ส่งรีวิว</button>
+                </div>
+            `;
+        }
+
+        let selectedRating = 0;
+        function setRating(n) {
+            selectedRating = n;
+            document.querySelectorAll('#starInput label').forEach((label, i) => label.classList.toggle('active', i < n));
+        }
+
+        async function submitReview() {
+            if (!selectedRating) { KNShop.showToast('กรุณาให้คะแนนดาว', 'error'); return; }
+            const comment = document.getElementById('reviewComment').value.trim();
+            if (!comment) { KNShop.showToast('กรุณาเขียนรีวิว', 'error'); return; }
+            const result = await KNShop.addReview(productId, selectedRating, comment);
+            if (result.success) {
+                KNShop.showToast(result.msg);
+                // Reload reviews
+                const data = await KNShop.getProduct(productId);
+                renderReviews(data.reviews || []);
+            } else {
+                KNShop.showToast(result.msg, 'error');
+            }
+        }
+
+        function renderReviews(reviews) {
+            const el = document.getElementById('reviewsList');
+            if (!reviews.length) { el.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">ยังไม่มีรีวิว เป็นคนแรกที่รีวิว!</p>'; return; }
+            el.innerHTML = reviews.map(r => {
+                let stars = '';
+                for (let i = 1; i <= 5; i++) stars += `<i class="fa-solid fa-star" style="color:${i <= r.rating ? '#ffc107' : '#e0e0e0'}; font-size:14px;"></i>`;
+                return `<div class="review-card"><div class="review-header"><div><span class="review-user"><i class="fa-solid fa-user-circle"></i> ${r.username}</span> ${stars}</div><span class="review-date">${KNShop.formatDate(r.createdAt)}</span></div><p class="review-comment">${r.comment}</p></div>`;
+            }).join('');
+        }
+    </script>
+</body>
+
+</html>

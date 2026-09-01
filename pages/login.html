@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - KN Shop</title>
+    <meta name="description" content="เข้าสู่ระบบ KN Shop - ร้านขายไอเทมเกม Roblox อันดับ 1">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Social Login Buttons */
+        .social-login {
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        .social-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .social-divider::before,
+        .social-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-bottom: 10px;
+            background: white;
+            color: #333;
+        }
+
+        .btn-social:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-google {
+            border-color: #ea4335;
+            color: #ea4335;
+        }
+
+        .btn-google:hover {
+            background: #ea4335;
+            color: white;
+        }
+
+        .btn-google i {
+            font-size: 18px;
+        }
+
+        .btn-facebook {
+            border-color: #1877f2;
+            color: #1877f2;
+        }
+
+        .btn-facebook:hover {
+            background: #1877f2;
+            color: white;
+        }
+
+        .btn-facebook i {
+            font-size: 18px;
+        }
+
+        /* Security Badge */
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .security-badge i {
+            color: #4caf50;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><a href="/index.html"><i class="fa-solid fa-gamepad"></i> <span>KN Shop</span></a></div>
+            <ul class="nav-links">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><a href="/index.html#categories"><i class="fa-solid fa-store"></i> สินค้า</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <a href="/pages/register.html" class="btn-register-nav"><i class="fa-solid fa-user-plus"></i> สมัครสมาชิก</a>
+            </div>
+        </div>
+    </nav>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span></li>
+                <li class="active"><span>เข้าสู่ระบบ</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <h2><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</h2>
+        <div id="login-error"
+            style="display:none; background:#fce4ec; color:#c62828; padding:10px; border-radius:8px; margin-bottom:15px; font-size:14px;">
+        </div>
+        <div id="login-success"
+            style="display:none; background:#e8f5e9; color:#2e7d32; padding:10px; border-radius:8px; margin-bottom:15px; font-size:14px;">
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>ชื่อผู้ใช้ หรือ อีเมล</label>
+                <input type="text" id="loginEmail" placeholder="กรอกชื่อผู้ใช้ หรือ อีเมล" required>
+            </div>
+            <div class="form-group">
+                <label>รหัสผ่าน</label>
+                <input type="password" id="loginPass" placeholder="กรอกรหัสผ่าน" required>
+            </div>
+            <button type="submit" class="btn-submit" id="loginBtn"><i class="fa-solid fa-right-to-bracket"></i>
+                เข้าสู่ระบบ</button>
+        </form>
+
+        <!-- Social Login -->
+        <div class="social-divider">หรือเข้าสู่ระบบด้วย</div>
+        <div class="social-login">
+            <a href="/api/auth/google" class="btn-social btn-google" id="googleLoginBtn">
+                <i class="fa-brands fa-google"></i> เข้าสู่ระบบด้วย Google
+            </a>
+            <a href="/api/auth/facebook" class="btn-social btn-facebook" id="facebookLoginBtn">
+                <i class="fa-brands fa-facebook-f"></i> เข้าสู่ระบบด้วย Facebook
+            </a>
+        </div>
+
+        <div class="auth-link">
+            <p><a href="/pages/forgot-password.html"><i class="fa-solid fa-key"></i> ลืมรหัสผ่าน?</a></p>
+            <p style="margin-top:8px;">ยังไม่มีบัญชี? <a href="/pages/register.html">สมัครสมาชิก</a></p>
+        </div>
+
+        <!-- Security Badges -->
+        <div class="security-badges">
+            <div class="security-badge"><i class="fa-solid fa-lock"></i> SSL</div>
+            <div class="security-badge"><i class="fa-solid fa-shield-halved"></i> JWT</div>
+            <div class="security-badge"><i class="fa-solid fa-fingerprint"></i> bcrypt</div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // Check social login callback
+        const socialResult = KNShop.handleSocialLoginCallback();
+        if (socialResult) {
+            if (socialResult.success) {
+                // Social login succeeded
+                const el = document.getElementById('login-success');
+                el.style.display = 'block';
+                el.innerHTML = '<i class="fa-solid fa-check-circle"></i> เข้าสู่ระบบด้วย ' +
+                    socialResult.social.charAt(0).toUpperCase() + socialResult.social.slice(1) + ' สำเร็จ! กำลังเข้าสู่ระบบ...';
+                setTimeout(() => window.location.href='/index.html', 1000);
+            } else {
+                showError(socialResult.msg);
+            }
+        } else if (KNShop.isLoggedIn()) {
+            window.location.href='/index.html';
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';
+
+            const emailOrUser = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+            const result = await KNShop.login(emailOrUser, password);
+
+            if (result.success) {
+                window.location.href='/index.html';
+            } else {
+                showError(result.msg);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ';
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('login-error');
+            el.style.display = 'block';
+            el.innerHTML = '<i class="fa-solid fa-exclamation-circle"></i> ' + msg;
+        }
+    </script>
+</body>
+
+</html>

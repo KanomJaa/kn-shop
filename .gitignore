@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Environment variables (SECRETS!)
+.env
+server/.env
+
+# Uploads
+server/uploads/*
+!server/uploads/.gitkeep
+!server/uploads/*.png
+!server/uploads/*.jpg
+!server/uploads/*.jpeg
+!server/uploads/*.gif
+!server/uploads/*.webp
+server/uploads/slips/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Unrelated starter project
+se-boilerplate-main/
+
+# SSL certs
+server/ssl/

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KN Shop - บริการเติมเกม Roblox ครบวงจร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <!-- Topbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/index.html">
+                    <i class="fa-solid fa-gamepad"></i> <span>KN Shop</span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/index.html" class="active"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><a href="/pages/topup.html"><i class="fa-solid fa-coins"></i> เติมเงิน</a></li>
+                <li><a href="#products"><i class="fa-solid fa-store"></i> สินค้าและบริการต่างๆ</a></li>
+                <li><a href="javascript:void(0)" onclick="openContactPopup()"><i class="fa-solid fa-headset"></i>
+                        ติดต่อเรา</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <a href="/pages/login.html" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</a>
+            </div>
+            <div class="mobile-menu-toggle">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>ยินดีต้อนรับสู่ <span class="highlight">KN Shop</span></h1>
+            <p>บริการเติมเกม Roblox รวดเร็ว ปลอดภัย และเชื่อถือได้อันดับ 1 ในไทย</p>
+            <a href="#categories" class="btn-primary">ดูสินค้าทั้งหมด</a>
+        </div>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info">
+                        <h3>ผู้ใช้ทั้งหมด</h3>
+                        <p id="stat-users">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="stat-info">
+                        <h3>สินค้าทั้งหมด</h3>
+                        <p id="stat-products">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
+                    <div class="stat-info">
+                        <h3>สต๊อกทั้งหมด</h3>
+                        <p id="stat-stock">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <div class="stat-info">
+                        <h3>ขายแล้วทั้งหมด</h3>
+                        <p id="stat-sold">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section - 2 หมวดหลักเหมือนเดิม -->
+    <section class="categories-section" id="categories">
+        <div class="container">
+            <h2 class="section-title">หมวดหมู่ทั้งหมด</h2>
+            <div class="categories-grid">
+                <a href="/pages/robux.html" class="category-card">
+                    <div class="cat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <h3>เติม Robux แท้ ระบบกลุ่ม</h3>
+                    <p>เรทดีที่สุด ปลอดภัย 100%</p>
+                </a>
+                <a href="/pages/gamepass.html" class="category-card">
+                    <div class="cat-icon"><i class="fa-solid fa-gamepad"></i></div>
+                    <h3>บริการกดเกมพาส</h3>
+                    <p>Blox Fruits, Pet Sim 99, และอื่นๆ</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section - โหลดจาก API -->
+    <section class="games-section" id="products">
+        <div class="container">
+            <h2 class="section-title">เกมและสินค้าแนะนำ</h2>
+            <div class="gamepass-grid" id="recommendedGrid">
+                <div style="grid-column:1/-1; text-align:center; padding:30px; color:#999;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+                    <p>กำลังโหลดสินค้า...</p>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:30px;">
+                <a href="/pages/gamepass.html" class="btn-view-all"><i class="fa-solid fa-gamepad"></i> ดูเกมทั้งหมด</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>KN Shop</h3>
+                    <p>เว็บไซต์จำหน่ายไอเทมและไอดีเกมส์ โดยมุ่งหวังให้ลูกค้าซื้อสินค้าได้สะดวก
+                        ได้รับสินค้ารวดเร็วและปลอดภัย เพื่อความพึงพอใจของลูกค้า</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li><a href="https://discord.gg/mCegxu4R" target="_blank"><i class="fa-brands fa-discord"></i>
+                                Join Discord</a></li>
+                        <li><a href="https://www.facebook.com/chnuth.phrhm.k.w.phrhm.k.w?locale=th_TH"
+                                target="_blank"><i class="fa-brands fa-facebook"></i> Facebook</a></li>
+                        <li><a href="https://line.me/ti/p/JbLgBMKTmy" target="_blank"><i class="fa-brands fa-line"></i>
+                                Line : @knshop</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Help ?</h3>
+                    <ul>
+                        <li><a href="/pages/topup.html">วิธีเติมเงิน</a></li>
+                        <li><a href="#">วิธีสั่งซื้อสินค้า</a></li>
+                        <li><a href="#">Terms Of Use</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 KN Shop. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-float-btn" onclick="openContactPopup()" title="แชทกับเรา">
+        <i class="fa-solid fa-comments"></i>
+    </button>
+
+    <!-- Contact Popup -->
+    <div class="contact-popup-overlay" id="contactPopup">
+        <div class="contact-popup">
+            <div class="contact-popup-header">
+                <h3><i class="fa-solid fa-headset"></i> ติดต่อเรา</h3>
+                <button class="contact-popup-close" onclick="closeContactPopup()"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="contact-popup-body">
+                <a href="https://www.facebook.com/chnuth.phrhm.k.w.phrhm.k.w?locale=th_TH" target="_blank"
+                    class="contact-item">
+                    <div class="ci-icon fb"><i class="fa-brands fa-facebook-f"></i></div>
+                    <div class="ci-info">
+                        <h4>Facebook</h4>
+                        <p>ส่งข้อความผ่าน Facebook</p>
+                    </div>
+                </a>
+                <a href="https://discord.gg/mCegxu4R" target="_blank" class="contact-item">
+                    <div class="ci-icon dc"><i class="fa-brands fa-discord"></i></div>
+                    <div class="ci-info">
+                        <h4>Discord</h4>
+                        <p>เข้าร่วม Discord Server</p>
+                    </div>
+                </a>
+                <div class="contact-item" onclick="openLinePopup()">
+                    <div class="ci-icon line"><i class="fa-brands fa-line"></i></div>
+                    <div class="ci-info">
+                        <h4>Line</h4>
+                        <p>Line ID : @knshop</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line QR Popup -->
+    <div class="line-qr-overlay" id="lineQrPopup">
+        <div class="line-qr-box">
+            <h3 style="color:#06c755; margin-bottom:4px;"><i class="fa-brands fa-line"></i> เพิ่มเพื่อน Line</h3>
+            <p style="font-size:13px; color:#999;">สแกน QR Code หรือกดลิงก์ด้านล่าง</p>
+            <img src="https://qr-official.line.me/gs/M_knshop_GW.png?oat_content=qr" alt="Line QR Code"
+                onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https://line.me/ti/p/JbLgBMKTmy'">
+            <div class="line-id">Line ID : @knshop</div>
+            <br>
+            <a href="https://line.me/ti/p/JbLgBMKTmy" target="_blank"
+                style="display:inline-block; margin-top:10px; padding:8px 20px; background:#06c755; color:white; border-radius:8px; font-weight:600; font-size:14px;"><i
+                    class="fa-brands fa-line"></i> เปิดใน Line</a>
+            <br>
+            <button class="close-qr" onclick="closeLinePopup()"><i class="fa-solid fa-xmark"></i> ปิด</button>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/script.js"></script>
+    <script>
+        function openContactPopup() {
+            document.getElementById('contactPopup').classList.add('active');
+        }
+        function closeContactPopup() {
+            document.getElementById('contactPopup').classList.remove('active');
+        }
+        function openLinePopup() {
+            closeContactPopup();
+            document.getElementById('lineQrPopup').classList.add('active');
+        }
+        function closeLinePopup() {
+            document.getElementById('lineQrPopup').classList.remove('active');
+        }
+        // Close on overlay click
+        document.getElementById('contactPopup').addEventListener('click', function (e) {
+            if (e.target === this) closeContactPopup();
+        });
+        document.getElementById('lineQrPopup').addEventListener('click', function (e) {
+            if (e.target === this) closeLinePopup();
+        });
+        // Close on ESC
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { closeContactPopup(); closeLinePopup(); }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิก - KN Shop</title>
+    <meta name="description" content="สมัครสมาชิก KN Shop - ร้านขายไอเทมเกม Roblox อันดับ 1">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .social-login {
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        .social-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .social-divider::before,
+        .social-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-bottom: 10px;
+            background: white;
+            color: #333;
+        }
+
+        .btn-social:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-google {
+            border-color: #ea4335;
+            color: #ea4335;
+        }
+
+        .btn-google:hover {
+            background: #ea4335;
+            color: white;
+        }
+
+        .btn-facebook {
+            border-color: #1877f2;
+            color: #1877f2;
+        }
+
+        .btn-facebook:hover {
+            background: #1877f2;
+            color: white;
+        }
+
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 6px;
+            background: #e0e0e0;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            width: 0;
+        }
+
+        .strength-text {
+            font-size: 11px;
+            margin-top: 4px;
+            color: #999;
+        }
+
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .security-badge i {
+            color: #4caf50;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><a href="/index.html"><i class="fa-solid fa-gamepad"></i> <span>KN Shop</span></a></div>
+            <ul class="nav-links">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+            </ul>
+            <div class="auth-buttons"><a href="/pages/login.html" class="btn-login"><i
+                        class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</a></div>
+        </div>
+    </nav>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span></li>
+                <li class="active"><span>สมัครสมาชิก</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <h2><i class="fa-solid fa-user-plus"></i> สมัครสมาชิก</h2>
+        <div id="reg-msg" style="display:none; padding:10px; border-radius:8px; margin-bottom:15px; font-size:14px;">
+        </div>
+
+        <!-- Social Login First -->
+        <div class="social-login">
+            <a href="/api/auth/google" class="btn-social btn-google">
+                <i class="fa-brands fa-google"></i> สมัครด้วย Google
+            </a>
+            <a href="/api/auth/facebook" class="btn-social btn-facebook">
+                <i class="fa-brands fa-facebook-f"></i> สมัครด้วย Facebook
+            </a>
+        </div>
+
+        <div class="social-divider">หรือสมัครด้วยอีเมล</div>
+
+        <form id="registerForm" onsubmit="handleRegister(event)">
+            <div class="form-group"><label>ชื่อผู้ใช้</label><input type="text" id="regUsername"
+                    placeholder="กรอกชื่อผู้ใช้" required minlength="3"></div>
+            <div class="form-group"><label>อีเมล</label><input type="email" id="regEmail" placeholder="กรอกอีเมล"
+                    required></div>
+            <div class="form-group">
+                <label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label>
+                <input type="password" id="regPass" placeholder="กรอกรหัสผ่าน" required minlength="6"
+                    oninput="updatePasswordStrength(this.value)">
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="strengthBar"></div>
+                </div>
+                <div class="strength-text" id="strengthText"></div>
+            </div>
+            <div class="form-group"><label>ยืนยันรหัสผ่าน</label><input type="password" id="regPassConfirm"
+                    placeholder="กรอกรหัสผ่านอีกครั้ง" required></div>
+            <button type="submit" class="btn-submit" id="regBtn"><i class="fa-solid fa-user-plus"></i>
+                สมัครสมาชิก</button>
+        </form>
+        <div class="auth-link">
+            <p>มีบัญชีอยู่แล้ว? <a href="/pages/login.html">เข้าสู่ระบบ</a></p>
+        </div>
+
+        <div class="security-badges">
+            <div class="security-badge"><i class="fa-solid fa-lock"></i> SSL</div>
+            <div class="security-badge"><i class="fa-solid fa-shield-halved"></i> ปลอดภัย</div>
+            <div class="security-badge"><i class="fa-solid fa-fingerprint"></i> เข้ารหัส</div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // Check social callback
+        const socialResult = KNShop.handleSocialLoginCallback();
+        if (socialResult && socialResult.success) {
+            showMsg('สมัครด้วย ' + socialResult.social + ' สำเร็จ!', 'success');
+            setTimeout(() => window.location.href='/index.html', 1000);
+        } else if (KNShop.isLoggedIn()) {
+            window.location.href='/index.html';
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const pass = document.getElementById('regPass').value;
+            const passConfirm = document.getElementById('regPassConfirm').value;
+            if (pass !== passConfirm) { showMsg('รหัสผ่านไม่ตรงกัน', 'error'); return; }
+
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังสมัคร...';
+
+            const result = await KNShop.register(
+                document.getElementById('regUsername').value.trim(),
+                document.getElementById('regEmail').value.trim(),
+                pass
+            );
+            if (result.success) {
+                showMsg('สมัครสมาชิกสำเร็จ! กำลังเข้าสู่ระบบ...', 'success');
+                setTimeout(() => window.location.href='/index.html', 1000);
+            } else {
+                showMsg(result.msg, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> สมัครสมาชิก';
+            }
+        }
+
+        function showMsg(msg, type) {
+            const el = document.getElementById('reg-msg');
+            el.style.display = 'block';
+            el.style.background = type === 'error' ? '#fce4ec' : '#e8f5e9';
+            el.style.color = type === 'error' ? '#c62828' : '#2e7d32';
+            el.innerHTML = `<i class="fa-solid fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i> ${msg}`;
+        }
+
+        function updatePasswordStrength(password) {
+            const bar = document.getElementById('strengthBar');
+            const text = document.getElementById('strengthText');
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            const colors = ['#ef5350', '#ff9800', '#ffc107', '#8bc34a', '#4caf50'];
+            const labels = ['อ่อนมาก', 'อ่อน', 'ปานกลาง', 'แข็งแกร่ง', 'แข็งแกร่งมาก'];
+            const widths = ['20%', '40%', '60%', '80%', '100%'];
+
+            const idx = Math.max(0, Math.min(strength - 1, 4));
+            bar.style.width = strength > 0 ? widths[idx] : '0';
+            bar.style.background = strength > 0 ? colors[idx] : '#e0e0e0';
+            text.textContent = strength > 0 ? `ความแข็งแกร่ง: ${labels[idx]}` : '';
+            text.style.color = strength > 0 ? colors[idx] : '#999';
+        }
+    </script>
+</body>
+
+</html>

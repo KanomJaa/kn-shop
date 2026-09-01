@@ -1,0 +1,340 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บริการกดเกมพาส - KN Shop</title>
+    <meta name="description" content="บริการกดเกมพาสเกม Roblox ราคาถูก รวดเร็ว ปลอดภัย 100% - KN Shop">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><a href="/index.html"><i class="fa-solid fa-gamepad"></i> <span>KN Shop</span></a></div>
+            <ul class="nav-links">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><a href="/pages/wallet.html"><i class="fa-solid fa-coins"></i> เติมเงิน</a></li>
+                <li><a href="/index.html#categories"><i class="fa-solid fa-store"></i> สินค้าและบริการต่างๆ</a></li>
+                <li><a href="javascript:void(0)" onclick="openContactPopup()"><i class="fa-solid fa-headset"></i>
+                        ติดต่อเรา</a></li>
+            </ul>
+            <div class="mobile-menu-toggle"><i class="fa-solid fa-bars"></i></div>
+            <div class="auth-buttons"></div>
+        </div>
+    </nav>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li><a href="/index.html"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+                <li><span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span></li>
+                <li class="active"><span>หมวดหมู่ทั้งหมด</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="gamepass-hero">
+        <div class="container">
+            <div class="gamepass-hero-content">
+                <div class="gamepass-badge"><i class="fa-solid fa-bolt"></i> GAMEPASS SERVICE</div>
+                <h1>บริการกดเกมพาส</h1>
+                <p>เลือกเกมที่คุณต้องการ บริการรวดเร็ว ปลอดภัย 100%</p>
+                <div class="gamepass-hero-stats">
+                    <div class="gp-stat"><i class="fa-solid fa-gamepad"></i> <span id="gpTotalGames">0</span> เกม</div>
+                    <div class="gp-stat"><i class="fa-solid fa-box"></i> <span id="gpTotalProducts">0</span> สินค้า
+                    </div>
+                    <div class="gp-stat"><i class="fa-solid fa-fire"></i> <span id="gpTotalSold">0</span> ชิ้นขายแล้ว
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Games Grid -->
+    <section class="gamepass-section">
+        <div class="container">
+            <div class="gamepass-grid" id="gamepassGrid">
+                <div style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;"></i>
+                    <p style="margin-top:10px;">กำลังโหลดหมวดหมู่...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Chat Button -->
+    <div class="floating-chat-btn" onclick="openContactPopup()">
+        <i class="fa-solid fa-comments"></i>
+    </div>
+
+    <!-- Contact Popup -->
+    <div class="contact-popup-overlay" id="contactPopup" onclick="closeContactPopup()">
+        <div class="contact-popup" onclick="event.stopPropagation()">
+            <div class="contact-popup-header">
+                <h3><i class="fa-solid fa-headset"></i> ติดต่อเรา</h3>
+                <button class="contact-close-btn" onclick="closeContactPopup()"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="contact-popup-body">
+                <a href="https://www.facebook.com/chnuth.phrhm.k.w.phrhm.k.w?locale=th_TH" target="_blank"
+                    class="contact-item">
+                    <div class="contact-icon facebook"><i class="fa-brands fa-facebook-f"></i></div>
+                    <div class="contact-info">
+                        <h4>Facebook</h4>
+                        <p>ส่งข้อความผ่าน Facebook</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+                <a href="https://discord.gg/mCegxu4R" target="_blank" class="contact-item">
+                    <div class="contact-icon discord"><i class="fa-brands fa-discord"></i></div>
+                    <div class="contact-info">
+                        <h4>Discord</h4>
+                        <p>เข้าร่วม Discord Server</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+                <div class="contact-item" onclick="openLinePopup()" style="cursor:pointer;">
+                    <div class="contact-icon line"><i class="fa-brands fa-line"></i></div>
+                    <div class="contact-info">
+                        <h4>Line</h4>
+                        <p>สแกน QR Code หรือเพิ่มเพื่อน</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line QR Popup -->
+    <div class="line-qr-overlay" id="lineQrPopup" onclick="closeLinePopup()">
+        <div class="line-qr-box" onclick="event.stopPropagation()">
+            <h3><i class="fa-brands fa-line" style="color:#06C755;"></i> Line QR Code</h3>
+            <img src="https://qr-official.line.me/gs/M_knshop_GW.png?oat_content=qr"
+                onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https://line.me/ti/p/JbLgBMKTmy'"
+                alt="Line QR Code" class="line-qr-img">
+            <div class="line-id-display">Line ID: <strong>@knshop</strong></div>
+            <a href="https://line.me/ti/p/JbLgBMKTmy" target="_blank" class="btn-open-line">
+                <i class="fa-brands fa-line"></i> เปิดใน Line
+            </a>
+            <button class="btn-close-line" onclick="closeLinePopup()">ปิด</button>
+        </div>
+    </div>
+
+    <!-- Banner Popup -->
+    <div class="banner-popup-overlay" id="bannerPopup" onclick="closeBannerPopup()">
+        <div class="banner-popup-box" onclick="event.stopPropagation()">
+            <button class="banner-close-btn" onclick="closeBannerPopup()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="banner-slider" id="bannerSlider">
+                <div class="banner-slide-container" id="bannerSlideContainer"></div>
+                <button class="banner-arrow banner-prev" id="bannerPrev"><i
+                        class="fa-solid fa-chevron-left"></i></button>
+                <button class="banner-arrow banner-next" id="bannerNext"><i
+                        class="fa-solid fa-chevron-right"></i></button>
+                <div class="banner-dots" id="bannerDots"></div>
+            </div>
+            <div class="banner-hot-badge" id="bannerHotBadge" style="display:none;">
+                <i class="fa-solid fa-fire"></i> HOT
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // ==================== CONTACT POPUPS ====================
+        function openContactPopup() {
+            document.getElementById('contactPopup').classList.add('active');
+        }
+        function closeContactPopup() {
+            document.getElementById('contactPopup').classList.remove('active');
+        }
+        function openLinePopup() {
+            closeContactPopup();
+            document.getElementById('lineQrPopup').style.display = 'flex';
+        }
+        function closeLinePopup() {
+            document.getElementById('lineQrPopup').style.display = 'none';
+        }
+
+        // ==================== BANNER POPUP ====================
+        let bannerData = [];
+        let currentBannerIndex = 0;
+
+        async function initBannerPopup() {
+            try {
+                const data = await KNShop.getBanners();
+                if (data.success && data.banners && data.banners.length > 0) {
+                    bannerData = data.banners;
+                    renderBannerSlider();
+                    // Show popup on page load
+                    const dismissed = sessionStorage.getItem('bannerDismissed');
+                    if (!dismissed) {
+                        setTimeout(() => {
+                            document.getElementById('bannerPopup').classList.add('active');
+                        }, 1000);
+                    }
+                }
+            } catch (err) {
+                console.error('Banner load error:', err);
+            }
+        }
+
+        function renderBannerSlider() {
+            const container = document.getElementById('bannerSlideContainer');
+            const dots = document.getElementById('bannerDots');
+
+            container.innerHTML = bannerData.map((b, i) => `
+                <div class="banner-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
+                    ${b.isHot ? '<div class="slide-hot-tag"><i class="fa-solid fa-fire"></i> HOT</div>' : ''}
+                    ${b.link ? `<a href="${b.link}" target="_blank">` : ''}
+                    <img src="${b.image}" alt="${b.title || 'Banner'}" onerror="this.style.display='none'">
+                    ${b.link ? '</a>' : ''}
+                    ${b.title ? `<div class="slide-title">${b.title}</div>` : ''}
+                </div>
+            `).join('');
+
+            dots.innerHTML = bannerData.map((_, i) =>
+                `<span class="banner-dot ${i === 0 ? 'active' : ''}" onclick="goToBanner(${i})"></span>`
+            ).join('');
+
+            // Hide arrows if only 1 banner
+            if (bannerData.length <= 1) {
+                document.getElementById('bannerPrev').style.display = 'none';
+                document.getElementById('bannerNext').style.display = 'none';
+                dots.style.display = 'none';
+            }
+
+            updateBannerHotBadge();
+        }
+
+        function goToBanner(index) {
+            const slides = document.querySelectorAll('.banner-slide');
+            const dots = document.querySelectorAll('.banner-dot');
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            currentBannerIndex = index;
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            updateBannerHotBadge();
+        }
+
+        function updateBannerHotBadge() {
+            const badge = document.getElementById('bannerHotBadge');
+            if (bannerData[currentBannerIndex]?.isHot) {
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        document.getElementById('bannerPrev')?.addEventListener('click', () => {
+            const newIndex = currentBannerIndex <= 0 ? bannerData.length - 1 : currentBannerIndex - 1;
+            goToBanner(newIndex);
+        });
+
+        document.getElementById('bannerNext')?.addEventListener('click', () => {
+            const newIndex = currentBannerIndex >= bannerData.length - 1 ? 0 : currentBannerIndex + 1;
+            goToBanner(newIndex);
+        });
+
+        function closeBannerPopup() {
+            document.getElementById('bannerPopup').classList.remove('active');
+            sessionStorage.setItem('bannerDismissed', '1');
+        }
+
+        // ==================== LOAD CATEGORIES ====================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Init banner popup
+            initBannerPopup();
+
+            try {
+                const catData = await KNShop.getCategories();
+                if (catData.success && catData.categories) {
+                    const gameCategories = catData.categories.filter(c => c.isActive && c.slug !== 'robux');
+
+                    // Update hero stats
+                    document.getElementById('gpTotalGames').textContent = gameCategories.length;
+                    const totalProducts = gameCategories.reduce((sum, c) => sum + (c.productCount || 0), 0);
+                    const totalSold = gameCategories.reduce((sum, c) => sum + (c.totalSold || 0), 0);
+                    document.getElementById('gpTotalProducts').textContent = totalProducts.toLocaleString();
+                    document.getElementById('gpTotalSold').textContent = totalSold.toLocaleString();
+
+                    renderGamepassGrid(gameCategories);
+                }
+            } catch (err) {
+                console.error('Gamepass load error:', err);
+                document.getElementById('gamepassGrid').innerHTML =
+                    '<p style="text-align:center; color:#999; grid-column:1/-1;">ไม่สามารถโหลดข้อมูลได้</p>';
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    closeContactPopup();
+                    closeLinePopup();
+                    closeBannerPopup();
+                }
+            });
+        });
+
+        function renderGamepassGrid(categories) {
+            const grid = document.getElementById('gamepassGrid');
+            if (!grid) return;
+
+            if (categories.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#999;"><h3>ยังไม่มีหมวดหมู่</h3></div>';
+                return;
+            }
+
+            grid.innerHTML = categories.map(c => {
+                const hasImage = c.image && c.image.length > 0;
+                const stockText = c.totalStock > 0 ? `${c.totalStock.toLocaleString()} ชิ้น` : 'ไม่จำกัด';
+
+                return `
+                <div class="gp-card" style="--card-color: ${c.headerColor || '#0288d1'}">
+                    ${c.isHot ? '<div class="gp-hot-badge"><i class="fa-solid fa-fire"></i> HOT</div>' : ''}
+                    <div class="gp-card-image">
+                        ${hasImage
+                        ? `<img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                               <div class="gp-card-icon-fallback" style="display:none;"><i class="${c.icon}"></i></div>`
+                        : `<div class="gp-card-icon-fallback"><i class="${c.icon}"></i></div>`
+                    }
+                    </div>
+                    <div class="gp-card-body">
+                        <h3 class="gp-card-title">${c.name}</h3>
+                        <p class="gp-card-desc">${c.description || 'ดูสินค้าทั้งหมด'}</p>
+                        <div class="gp-card-stats">
+                            <span><i class="fa-solid fa-box"></i> ${c.productCount || 0} สินค้า</span>
+                            <span><i class="fa-solid fa-fire-flame-curved"></i> ขายแล้ว ${(c.totalSold || 0).toLocaleString()} ชิ้น</span>
+                        </div>
+                        <div class="gp-card-stock">
+                            <span><i class="fa-solid fa-warehouse"></i> สต๊อก: ${stockText}</span>
+                        </div>
+                        <a href="/pages/products.html?cat=${c.slug}" class="gp-card-btn">
+                            <i class="fa-solid fa-store"></i> ดูสินค้า
+                        </a>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+    </script>
+    <script src="/js/script.js"></script>
+    <script>
+        // Banner popup on gamepass page
+        (async function () {
+            try {
+                const bannerResult = await KNShop.getBanners();
+                if (bannerResult.success && bannerResult.banners && bannerResult.banners.length > 0) {
+                    initHomeBannerPopup(bannerResult.banners);
+                }
+            } catch (e) { console.error('Banner error:', e); }
+        })();
+    </script>
+</body>
+
+</html>
