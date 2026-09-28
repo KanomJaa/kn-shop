@@ -14,6 +14,19 @@ const {
 } = require('../middleware/validate');
 const { notifyNewUser } = require('../utils/line');
 
+// OAuth strategies are registered only when both credentials are available.
+// Keep these routes graceful on deployments that have not configured OAuth yet;
+// otherwise Passport throws "Unknown authentication strategy" and Express
+// responds with an unhelpful Internal Server Error.
+const oauthConfigured = {
+    google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+    facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET),
+};
+
+const oauthUnavailable = (provider) => (req, res) => {
+    res.redirect(`/pages/login.html?error=${provider}_unavailable`);
+};
+
 // ==================== REGISTER ====================
 router.post('/register', registerRules, validate, async (req, res) => {
     try {
@@ -410,39 +423,49 @@ router.post('/reset-password', resetPasswordRules, validate, async (req, res) =>
 });
 
 // ==================== GOOGLE OAuth ====================
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
+if (oauthConfigured.google) {
+    router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
 
-router.get('/google/callback', passport.authenticate('google', {
-    session: false,
-    failureRedirect: '/login.html?error=google_failed',
-}), async (req, res) => {
-    try {
-        const accessToken = generateToken(req.user._id);
-        const refreshToken = generateRefreshToken(req.user._id, req.user.tokenVersion);
-        setRefreshCookie(res, refreshToken);
-        await logAction({ req, user: req.user, action: 'social_login_google', details: `Google login: ${req.user.username}` });
-        res.redirect(`/login.html?token=${accessToken}&social=google`);
-    } catch (err) {
-        res.redirect('/login.html?error=google_failed');
-    }
-});
+    router.get('/google/callback', passport.authenticate('google', {
+        session: false,
+        failureRedirect: '/pages/login.html?error=google_failed',
+    }), async (req, res) => {
+        try {
+            const accessToken = generateToken(req.user._id);
+            const refreshToken = generateRefreshToken(req.user._id, req.user.tokenVersion);
+            setRefreshCookie(res, refreshToken);
+            await logAction({ req, user: req.user, action: 'social_login_google', details: `Google login: ${req.user.username}` });
+            res.redirect(`/pages/login.html?token=${accessToken}&social=google`);
+        } catch (err) {
+            res.redirect('/pages/login.html?error=google_failed');
+        }
+    });
+} else {
+    router.get('/google', oauthUnavailable('google'));
+    router.get('/google/callback', oauthUnavailable('google'));
+}
 
 // ==================== FACEBOOK OAuth ====================
-router.get('/facebook', passport.authenticate('facebook', { scope: ['email'], session: false }));
+if (oauthConfigured.facebook) {
+    router.get('/facebook', passport.authenticate('facebook', { scope: ['email'], session: false }));
 
-router.get('/facebook/callback', passport.authenticate('facebook', {
-    session: false,
-    failureRedirect: '/login.html?error=facebook_failed',
-}), async (req, res) => {
-    try {
-        const accessToken = generateToken(req.user._id);
-        const refreshToken = generateRefreshToken(req.user._id, req.user.tokenVersion);
-        setRefreshCookie(res, refreshToken);
-        await logAction({ req, user: req.user, action: 'social_login_facebook', details: `Facebook login: ${req.user.username}` });
-        res.redirect(`/login.html?token=${accessToken}&social=facebook`);
-    } catch (err) {
-        res.redirect('/login.html?error=facebook_failed');
-    }
-});
+    router.get('/facebook/callback', passport.authenticate('facebook', {
+        session: false,
+        failureRedirect: '/pages/login.html?error=facebook_failed',
+    }), async (req, res) => {
+        try {
+            const accessToken = generateToken(req.user._id);
+            const refreshToken = generateRefreshToken(req.user._id, req.user.tokenVersion);
+            setRefreshCookie(res, refreshToken);
+            await logAction({ req, user: req.user, action: 'social_login_facebook', details: `Facebook login: ${req.user.username}` });
+            res.redirect(`/pages/login.html?token=${accessToken}&social=facebook`);
+        } catch (err) {
+            res.redirect('/pages/login.html?error=facebook_failed');
+        }
+    });
+} else {
+    router.get('/facebook', oauthUnavailable('facebook'));
+    router.get('/facebook/callback', oauthUnavailable('facebook'));
+}
 
 module.exports = router;

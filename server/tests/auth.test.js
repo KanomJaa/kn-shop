@@ -234,3 +234,19 @@ describe('POST /api/auth/logout', () => {
         expect(res.body.msg).toContain('ออกจากระบบ');
     });
 });
+
+describe('OAuth configuration fallback', () => {
+    it('should redirect Google login to a useful error when OAuth is not configured', async () => {
+        const res = await request(app).get('/api/auth/google');
+
+        expect(res.status).toBe(302);
+        expect(res.headers.location).toBe('/pages/login.html?error=google_unavailable');
+    });
+
+    it('should redirect Facebook login to a useful error when OAuth is not configured', async () => {
+        const res = await request(app).get('/api/auth/facebook');
+
+        expect(res.status).toBe(302);
+        expect(res.headers.location).toBe('/pages/login.html?error=facebook_unavailable');
+    });
+});

@@ -186,7 +186,15 @@ const KNShop = {
         const social = params.get('social');
         const error = params.get('error');
 
-        if (error) return { success: false, msg: `เข้าสู่ระบบด้วย ${error.replace('_failed', '')} ไม่สำเร็จ` };
+        if (error) {
+            const oauthErrors = {
+                google_unavailable: 'ยังไม่ได้ตั้งค่าการเข้าสู่ระบบด้วย Google บนเซิร์ฟเวอร์',
+                facebook_unavailable: 'ยังไม่ได้ตั้งค่าการเข้าสู่ระบบด้วย Facebook บนเซิร์ฟเวอร์',
+                google_failed: 'เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองใหม่',
+                facebook_failed: 'เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ กรุณาลองใหม่',
+            };
+            return { success: false, msg: oauthErrors[error] || 'เข้าสู่ระบบด้วยบัญชีภายนอกไม่สำเร็จ' };
+        }
         if (token && social) {
             this.setToken(token);
             // Clean URL
