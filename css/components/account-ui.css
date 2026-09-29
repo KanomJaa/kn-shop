@@ -1,4 +1,14 @@
 /* ========== USER MENU / NAVBAR ========== */
+.auth-buttons {
+    min-height: 40px;
+}
+
+/* ป้องกันปุ่ม Login สำรองกะพริบระหว่างรอตรวจสอบ token */
+.auth-buttons:not(.auth-ready) {
+    visibility: hidden;
+    pointer-events: none;
+}
+
 .user-menu {
     display: flex;
     align-items: center;

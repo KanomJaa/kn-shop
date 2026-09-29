@@ -483,43 +483,53 @@ const KNShop = {
         const authBtns = document.querySelector('.auth-buttons');
         if (!authBtns) return;
 
-        if (this.isLoggedIn()) {
-            const user = await this.getCurrentUser();
-            if (!user) {
-                this.logout();
+        // HTML บางหน้ามีปุ่ม Login สำรองอยู่ตั้งแต่แรก เพื่อให้ใช้งานได้แม้ JS ล้มเหลว
+        // ซ่อนส่วนนั้นไว้ระหว่างตรวจ token เพื่อไม่ให้ปุ่ม Login กะพริบก่อนข้อมูลบัญชีโหลดเสร็จ
+        authBtns.classList.remove('auth-ready');
+        authBtns.setAttribute('aria-busy', 'true');
+
+        try {
+            if (this.isLoggedIn()) {
+                const user = await this.getCurrentUser();
+                if (!user) {
+                    await this.logout();
+                    authBtns.innerHTML = `
+                        <a href="/pages/login.html" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</a>
+                        <a href="/pages/register.html" class="btn-register-nav"><i class="fa-solid fa-user-plus"></i> สมัครสมาชิก</a>
+                    `;
+                    this.updateMobileMenu(null);
+                    return;
+                }
+
+                const cartCount = this.getCartCount();
+                authBtns.innerHTML = `
+                    <span class="points-display"><i class="fa-solid fa-coins"></i> ${user.points.toLocaleString()} P</span>
+                    <a href="/pages/cart.html" class="btn-cart" title="ตะกร้า" id="navCartBtn">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="cart-badge" id="navCartBadge" style="${cartCount > 0 ? '' : 'display:none;'}">${cartCount}</span>
+                    </a>
+                    <div class="user-dropdown">
+                        <button class="btn-user"><i class="fa-solid fa-user"></i> ${this.escapeHTML(user.username)}</button>
+                        <div class="dropdown-content">
+                            <a href="/pages/profile.html"><i class="fa-solid fa-user"></i> โปรไฟล์</a>
+                            <a href="/pages/wallet.html"><i class="fa-solid fa-wallet"></i> กระเป๋าเงิน</a>
+                            <a href="/pages/order-history.html"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติสั่งซื้อ</a>
+                            ${user.role === 'admin' ? '<a href="/pages/admin.html"><i class="fa-solid fa-shield-halved"></i> แอดมิน</a>' : ''}
+                            <a href="#" onclick="KNShop.logout(); window.location.href='/index.html'; return false;"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a>
+                        </div>
+                    </div>
+                `;
+                this.updateMobileMenu(user);
+            } else {
                 authBtns.innerHTML = `
                     <a href="/pages/login.html" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</a>
                     <a href="/pages/register.html" class="btn-register-nav"><i class="fa-solid fa-user-plus"></i> สมัครสมาชิก</a>
                 `;
                 this.updateMobileMenu(null);
-                return;
             }
-
-            const cartCount = this.getCartCount();
-            authBtns.innerHTML = `
-                <span class="points-display"><i class="fa-solid fa-coins"></i> ${user.points.toLocaleString()} P</span>
-                <a href="/pages/cart.html" class="btn-cart" title="ตะกร้า" id="navCartBtn">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span class="cart-badge" id="navCartBadge" style="${cartCount > 0 ? '' : 'display:none;'}">${cartCount}</span>
-                </a>
-                <div class="user-dropdown">
-                    <button class="btn-user"><i class="fa-solid fa-user"></i> ${this.escapeHTML(user.username)}</button>
-                    <div class="dropdown-content">
-                        <a href="/pages/profile.html"><i class="fa-solid fa-user"></i> โปรไฟล์</a>
-                        <a href="/pages/wallet.html"><i class="fa-solid fa-wallet"></i> กระเป๋าเงิน</a>
-                        <a href="/pages/order-history.html"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติสั่งซื้อ</a>
-                        ${user.role === 'admin' ? '<a href="/pages/admin.html"><i class="fa-solid fa-shield-halved"></i> แอดมิน</a>' : ''}
-                        <a href="#" onclick="KNShop.logout(); window.location.href='/index.html'; return false;"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a>
-                    </div>
-                </div>
-            `;
-            this.updateMobileMenu(user);
-        } else {
-            authBtns.innerHTML = `
-                <a href="/pages/login.html" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</a>
-                <a href="/pages/register.html" class="btn-register-nav"><i class="fa-solid fa-user-plus"></i> สมัครสมาชิก</a>
-            `;
-            this.updateMobileMenu(null);
+        } finally {
+            authBtns.removeAttribute('aria-busy');
+            authBtns.classList.add('auth-ready');
         }
     },
 
