@@ -1,0 +1,240 @@
+/* ========== USER MENU / NAVBAR ========== */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.points-display {
+    background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #0277bd;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none !important;
+}
+
+.user-points {
+    background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #0277bd;
+    white-space: nowrap;
+    text-decoration: none !important;
+}
+
+.btn-cart {
+    position: relative;
+    font-size: 20px;
+    color: #555;
+    padding: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+    margin: 0 4px;
+}
+
+.btn-cart:hover {
+    color: var(--primary-color);
+}
+
+.btn-cart-nav {
+    position: relative;
+    font-size: 20px;
+    color: #555;
+    padding: 8px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none !important;
+}
+
+.btn-cart-nav:hover {
+    color: var(--primary-color);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background: #e53935;
+    color: white;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid white;
+    line-height: 1;
+    text-decoration: none !important;
+}
+
+.btn-register-nav {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 7px 18px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-register-nav:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.user-dropdown {
+    position: relative;
+}
+
+.btn-user {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-user:hover {
+    background: var(--secondary-color);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    padding-top: 8px;
+    min-width: 200px;
+    z-index: 1000;
+}
+
+.dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+}
+
+.dropdown-content>a:first-child {
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.dropdown-content>a:last-child {
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.user-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    color: #333;
+    font-size: 14px;
+    transition: 0.2s;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dropdown-content a:hover {
+    background: var(--accent-color);
+    color: var(--primary-color);
+}
+
+/* ========== TOAST NOTIFICATIONS ========== */
+.toast {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 28px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    z-index: 9999;
+    transition: bottom 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.toast.show {
+    bottom: 30px;
+}
+
+.toast-success {
+    background: #2e7d32;
+}
+
+.toast-error {
+    background: #c62828;
+}
+
+.toast-info {
+    background: #0277bd;
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 28px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 500;
+    z-index: 99999;
+    transition: bottom 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    text-decoration: none !important;
+    max-width: 90vw;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.toast-notification.show {
+    bottom: 30px;
+}
+
+.toast-notification.toast-success {
+    background: #2e7d32;
+}
+
+.toast-notification.toast-error {
+    background: #c62828;
+}
+
+.toast-notification.toast-info {
+    background: #0277bd;
+}
+

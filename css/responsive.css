@@ -1,0 +1,245 @@
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .cart-item {
+        grid-template-columns: 60px 1fr;
+        gap: 10px;
+    }
+
+    .cart-item-price,
+    .cart-qty,
+    .cart-remove {
+        grid-column: 2;
+    }
+
+    .admin-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .admin-tabs {
+        flex-wrap: wrap;
+    }
+
+    .payment-methods-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Navbar user menu responsive */
+    .auth-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .points-display {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .btn-user {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .btn-cart {
+        font-size: 18px;
+        padding: 6px;
+    }
+
+    .product-detail-container {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .product-title {
+        font-size: 1.4rem;
+    }
+
+    .product-price {
+        font-size: 1.8rem;
+    }
+
+    .page-header {
+        padding: 40px 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .page-header p {
+        font-size: 0.9rem;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 22px;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .auth-container,
+    .topup-container {
+        margin: 40px auto;
+        padding: 25px;
+    }
+
+    .profile-card {
+        padding: 25px;
+    }
+
+    .wallet-balance .balance-amount {
+        font-size: 2rem;
+    }
+
+    .topup-options {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 12px;
+    }
+
+    .navbar {
+        height: 60px;
+    }
+
+    .logo a {
+        font-size: 18px;
+    }
+
+    .logo i {
+        font-size: 22px;
+    }
+
+    .points-display {
+        font-size: 10px;
+        padding: 3px 7px;
+    }
+
+    .btn-user {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .btn-cart {
+        font-size: 16px;
+        padding: 4px;
+    }
+
+    .cart-badge {
+        font-size: 9px;
+        min-width: 16px;
+        height: 16px;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+    .product-image {
+        height: 120px;
+    }
+
+    .product-details {
+        padding: 10px;
+    }
+
+    .product-details h4 {
+        font-size: 13px;
+    }
+
+    .price-tag {
+        font-size: 16px;
+    }
+
+    .btn-buy {
+        padding: 6px;
+        font-size: 13px;
+    }
+
+    .hero {
+        padding: 50px 0;
+    }
+
+    .hero h1 {
+        font-size: 1.4rem;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+    }
+
+    .stat-info p {
+        font-size: 18px;
+    }
+
+    .stat-info h3 {
+        font-size: 12px;
+    }
+
+    .page-header {
+        padding: 30px 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .admin-table {
+        font-size: 12px;
+        display: block;
+        overflow-x: auto;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 8px 10px;
+    }
+
+    .admin-panel {
+        padding: 15px;
+    }
+
+    .cart-summary {
+        padding: 20px;
+    }
+
+    .btn-checkout {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+

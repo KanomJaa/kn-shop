@@ -13,6 +13,7 @@ const {
     forgotPasswordRules, verifyOtpRules, resetPasswordRules,
 } = require('../middleware/validate');
 const { notifyNewUser } = require('../utils/line');
+const { profileLimiter } = require('../middleware/userRateLimit');
 
 // OAuth strategies are registered only when both credentials are available.
 // Keep these routes graceful on deployments that have not configured OAuth yet;
@@ -89,7 +90,7 @@ router.get('/verify-email', async (req, res) => {
         });
 
         if (!user) {
-            return res.redirect('/login.html?error=verify_expired');
+            return res.redirect('/pages/login.html?error=verify_expired');
         }
 
         user.emailVerified = true;
@@ -103,10 +104,10 @@ router.get('/verify-email', async (req, res) => {
             details: `${user.email} ยืนยันอีเมลสำเร็จ`,
         });
 
-        res.redirect('/login.html?verified=true');
+        res.redirect('/pages/login.html?verified=true');
     } catch (err) {
         console.error('Email verify error:', err.message);
-        res.redirect('/login.html?error=verify_failed');
+        res.redirect('/pages/login.html?error=verify_failed');
     }
 });
 
@@ -215,7 +216,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // ==================== UPDATE PROFILE ====================
-router.put('/profile', auth, async (req, res) => {
+router.put('/profile', auth, profileLimiter, async (req, res) => {
     try {
         const { robloxUsername } = req.body;
 
@@ -435,7 +436,7 @@ if (oauthConfigured.google) {
             const refreshToken = generateRefreshToken(req.user._id, req.user.tokenVersion);
             setRefreshCookie(res, refreshToken);
             await logAction({ req, user: req.user, action: 'social_login_google', details: `Google login: ${req.user.username}` });
-            res.redirect(`/pages/login.html?token=${accessToken}&social=google`);
+            res.redirect(`/pages/login.html#token=${accessToken}&social=google`);
         } catch (err) {
             res.redirect('/pages/login.html?error=google_failed');
         }
@@ -458,7 +459,7 @@ if (oauthConfigured.facebook) {
             const refreshToken = generateRefreshToken(req.user._id, req.user.tokenVersion);
             setRefreshCookie(res, refreshToken);
             await logAction({ req, user: req.user, action: 'social_login_facebook', details: `Facebook login: ${req.user.username}` });
-            res.redirect(`/pages/login.html?token=${accessToken}&social=facebook`);
+            res.redirect(`/pages/login.html#token=${accessToken}&social=facebook`);
         } catch (err) {
             res.redirect('/pages/login.html?error=facebook_failed');
         }

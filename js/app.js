@@ -104,23 +104,27 @@ const KNShop = {
     },
 
     async logout() {
+        // Clear local state synchronously so navigation cannot leave a stale token behind.
+        const tokenToRevoke = this.token;
+        this.token = null;
+        this.cachedUser = null;
+        localStorage.removeItem('kn_token');
+        localStorage.removeItem('kn_cart');
+
         // เรียก backend เพื่อลบ refresh token cookie
         try {
             await fetch(API_BASE + '/auth/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + this.token,
+                    ...(tokenToRevoke ? { 'Authorization': 'Bearer ' + tokenToRevoke } : {}),
                 },
                 credentials: 'same-origin',
+                keepalive: true,
             });
         } catch (err) {
             // ไม่ต้อง block logout แม้ API ล้มเหลว
         }
-        this.token = null;
-        this.cachedUser = null;
-        localStorage.removeItem('kn_token');
-        localStorage.removeItem('kn_cart');
     },
 
     setToken(token) {
@@ -181,10 +185,11 @@ const KNShop = {
     },
 
     handleSocialLoginCallback() {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-        const social = params.get('social');
-        const error = params.get('error');
+        const queryParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const token = hashParams.get('token') || queryParams.get('token');
+        const social = hashParams.get('social') || queryParams.get('social');
+        const error = queryParams.get('error') || hashParams.get('error');
 
         if (error) {
             const oauthErrors = {
@@ -422,6 +427,23 @@ const KNShop = {
     },
 
     // ==================== UI HELPERS ====================
+    escapeHTML(value) {
+        const element = document.createElement('div');
+        element.textContent = String(value ?? '');
+        return element.innerHTML;
+    },
+
+    safeUrl(value, fallback = '') {
+        if (!value) return fallback;
+        try {
+            const url = new URL(String(value), window.location.origin);
+            if (!['http:', 'https:'].includes(url.protocol)) return fallback;
+            return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : url.href;
+        } catch (err) {
+            return fallback;
+        }
+    },
+
     showToast(msg, type = 'success') {
         const existing = document.getElementById('kn-toast');
         if (existing) existing.remove();
@@ -429,7 +451,9 @@ const KNShop = {
         const toast = document.createElement('div');
         toast.id = 'kn-toast';
         toast.className = 'toast-notification ' + (type === 'error' ? 'toast-error' : type === 'info' ? 'toast-info' : 'toast-success');
-        toast.innerHTML = `<i class="fa-solid fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}"></i> ${msg}`;
+        const icon = document.createElement('i');
+        icon.className = `fa-solid fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}`;
+        toast.append(icon, document.createTextNode(` ${String(msg)}`));
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
@@ -479,7 +503,7 @@ const KNShop = {
                     <span class="cart-badge" id="navCartBadge" style="${cartCount > 0 ? '' : 'display:none;'}">${cartCount}</span>
                 </a>
                 <div class="user-dropdown">
-                    <button class="btn-user"><i class="fa-solid fa-user"></i> ${user.username}</button>
+                    <button class="btn-user"><i class="fa-solid fa-user"></i> ${this.escapeHTML(user.username)}</button>
                     <div class="dropdown-content">
                         <a href="/pages/profile.html"><i class="fa-solid fa-user"></i> โปรไฟล์</a>
                         <a href="/pages/wallet.html"><i class="fa-solid fa-wallet"></i> กระเป๋าเงิน</a>
@@ -521,9 +545,9 @@ const KNShop = {
         if (user) {
             menuHTML += `
                 <div class="mobile-user-info">
-                    <div class="mobile-avatar">${user.username.charAt(0).toUpperCase()}</div>
+                    <div class="mobile-avatar">${this.escapeHTML(user.username.charAt(0).toUpperCase())}</div>
                     <div class="mobile-user-detail">
-                        <div class="name">${user.username}</div>
+                        <div class="name">${this.escapeHTML(user.username)}</div>
                         <div class="points"><i class="fa-solid fa-coins"></i> ${user.points.toLocaleString()} Point</div>
                     </div>
                 </div>

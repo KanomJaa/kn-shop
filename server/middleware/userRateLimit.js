@@ -10,7 +10,7 @@
 const userRateLimits = new Map();
 
 // Clean up expired entries every 5 minutes
-setInterval(() => {
+const cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [key, data] of userRateLimits.entries()) {
         if (now > data.resetAt) {
@@ -18,6 +18,9 @@ setInterval(() => {
         }
     }
 }, 5 * 60 * 1000);
+
+// Do not keep Node/Jest alive only because of housekeeping.
+cleanupTimer.unref?.();
 
 /**
  * สร้าง rate limiter ต่อ user

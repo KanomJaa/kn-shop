@@ -7,14 +7,69 @@ const Order = require('../models/Order');
 const Transaction = require('../models/Transaction');
 const Review = require('../models/Review');
 const Banner = require('../models/Banner');
+const ActionLog = require('../models/ActionLog');
 const { adminAuth } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
+const { sendLineNotify, getLineStatus } = require('../utils/line');
+const {
+    validate,
+    adminPointsRules,
+    adminProductRules,
+    adminCategoryRules,
+    mongoIdParam,
+} = require('../middleware/validate');
 
 // Helper: Escape regex special characters to prevent ReDoS
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // All routes require admin auth
 router.use(adminAuth);
+
+// LINE diagnostics. Never expose access tokens or target IDs.
+router.get('/line/status', (req, res) => {
+    res.json({ success: true, line: getLineStatus() });
+});
+
+router.post('/line/test', async (req, res) => {
+    const result = await sendLineNotify(
+        `✅ ทดสอบการแจ้งเตือน KN Shop\n\n👤 ทดสอบโดย: ${req.user.username}\n🕐 เวลา: ${new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}`
+    );
+    if (!result.success) {
+        return res.status(502).json({ success: false, msg: result.error, line: result });
+    }
+    return res.json({ success: true, msg: 'ส่งข้อความทดสอบ LINE สำเร็จ', line: result });
+});
+
+// ================================================================
+// ==================== ACTION LOGS ====================
+// ================================================================
+router.get('/action-logs', async (req, res) => {
+    try {
+        const { action, userId, page = 1, limit = 50 } = req.query;
+        const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
+        const safeLimit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 50));
+        const filter = {};
+        if (action) filter.action = action;
+        if (userId) filter.userId = userId;
+
+        const total = await ActionLog.countDocuments(filter);
+        const logs = await ActionLog.find(filter)
+            .sort('-createdAt')
+            .skip((safePage - 1) * safeLimit)
+            .limit(safeLimit)
+            .lean();
+
+        res.json({
+            success: true,
+            logs,
+            total,
+            page: safePage,
+            totalPages: Math.ceil(total / safeLimit),
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, msg: 'เกิดข้อผิดพลาด' });
+    }
+});
 
 // ================================================================
 // ==================== DASHBOARD STATS ====================
@@ -74,7 +129,7 @@ router.get('/users', async (req, res) => {
 });
 
 // Add/Deduct points
-router.put('/users/:id/points', async (req, res) => {
+router.put('/users/:id/points', adminPointsRules, validate, async (req, res) => {
     try {
         const { amount, note } = req.body; // positive = add, negative = deduct
         if (!amount || amount === 0) return res.status(400).json({ success: false, msg: 'จำนวนไม่ถูกต้อง' });
@@ -120,7 +175,7 @@ router.put('/users/:id/points', async (req, res) => {
 });
 
 // Ban/Unban user
-router.put('/users/:id/ban', async (req, res) => {
+router.put('/users/:id/ban', mongoIdParam, validate, async (req, res) => {
     try {
         const { ban, reason } = req.body;
         const user = await User.findByIdAndUpdate(req.params.id, {
@@ -192,25 +247,48 @@ router.put('/orders/:id/status', async (req, res) => {
 // Refund order
 router.post('/orders/:id/refund', async (req, res) => {
     try {
-        const order = await Order.findOne({ orderId: req.params.id });
-        if (!order) return res.status(404).json({ success: false, msg: 'ไม่พบออเดอร์' });
-        if (order.refunded) return res.status(400).json({ success: false, msg: 'ออเดอร์นี้คืนเงินไปแล้ว' });
+        // Claim the refund atomically so concurrent admin requests cannot credit twice.
+        const order = await Order.findOneAndUpdate(
+            { orderId: req.params.id, refunded: false },
+            { $set: { refunded: true, status: 'refunded' } },
+            { new: false }
+        );
+        if (!order) {
+            const existing = await Order.findOne({ orderId: req.params.id });
+            if (!existing) return res.status(404).json({ success: false, msg: 'ไม่พบออเดอร์' });
+            return res.status(400).json({ success: false, msg: 'ออเดอร์นี้คืนเงินไปแล้ว' });
+        }
 
-        // Refund points to user
-        await User.findByIdAndUpdate(order.user, { $inc: { points: order.totalPoints } });
+        let pointsRefunded = false;
+        try {
+            const refundedUser = await User.findByIdAndUpdate(
+                order.user,
+                { $inc: { points: order.totalPoints } },
+                { new: true }
+            );
+            if (!refundedUser) throw new Error('ไม่พบผู้ใช้สำหรับคืนเงิน');
+            pointsRefunded = true;
 
-        // Create transaction
-        await Transaction.create({
-            user: order.user,
-            type: 'refund',
-            amount: order.totalPoints,
-            orderId: order.orderId,
-            note: `คืน Point จากออเดอร์ ${order.orderId}`
-        });
+            await Transaction.create({
+                user: order.user,
+                type: 'refund',
+                amount: order.totalPoints,
+                orderId: order.orderId,
+                note: `คืน Point จากออเดอร์ ${order.orderId}`
+            });
+        } catch (refundErr) {
+            if (pointsRefunded) {
+                await User.findByIdAndUpdate(order.user, { $inc: { points: -order.totalPoints } });
+            }
+            await Order.updateOne(
+                { _id: order._id, refunded: true },
+                { $set: { refunded: false, status: order.status } }
+            );
+            throw refundErr;
+        }
 
         order.refunded = true;
         order.status = 'refunded';
-        await order.save();
 
         await logAction({
             req, user: req.user,
@@ -229,7 +307,7 @@ router.post('/orders/:id/refund', async (req, res) => {
 // ==================== CATEGORY MANAGEMENT ====================
 // ================================================================
 // Create category
-router.post('/categories', async (req, res) => {
+router.post('/categories', adminCategoryRules, validate, async (req, res) => {
     try {
         const { name, slug, description, icon, headerColor, image, isHot } = req.body;
         if (!name || !slug) return res.status(400).json({ success: false, msg: 'กรอกชื่อและ slug' });
@@ -255,7 +333,7 @@ router.post('/categories', async (req, res) => {
 });
 
 // Update category
-router.put('/categories/:id', async (req, res) => {
+router.put('/categories/:id', mongoIdParam, validate, async (req, res) => {
     try {
         // Whitelist allowed fields to prevent mass assignment
         const allowed = ['name', 'slug', 'description', 'icon', 'headerColor', 'image', 'isActive', 'isHot', 'sortOrder'];
@@ -281,14 +359,14 @@ router.put('/categories/:id', async (req, res) => {
 });
 
 // Delete category
-router.delete('/categories/:id', async (req, res) => {
+router.delete('/categories/:id', mongoIdParam, validate, async (req, res) => {
     try {
         const productCount = await Product.countDocuments({ category: req.params.id });
         if (productCount > 0) {
             return res.status(400).json({ success: false, msg: `ไม่สามารถลบได้ มีสินค้า ${productCount} รายการ ในหมวดหมู่นี้` });
         }
-        const delCat = await Category.findById(req.params.id);
-        await Category.findByIdAndDelete(req.params.id);
+        const delCat = await Category.findByIdAndDelete(req.params.id);
+        if (!delCat) return res.status(404).json({ success: false, msg: 'ไม่พบหมวดหมู่' });
 
         await logAction({
             req, user: req.user,
@@ -317,7 +395,7 @@ router.get('/products', async (req, res) => {
 });
 
 // Create product
-router.post('/products', async (req, res) => {
+router.post('/products', adminProductRules, validate, async (req, res) => {
     try {
         const { title, price, categoryId, categorySlug, description, image, imgLabel, inStock, stockQty, deliveryMethod } = req.body;
         if (!title || price == null || !categoryId || !categorySlug) {
@@ -327,7 +405,8 @@ router.post('/products', async (req, res) => {
         const product = await Product.create({
             title, price, category: categoryId, categorySlug,
             description: description || '', image: image || '', imgLabel: imgLabel || title,
-            inStock: inStock !== false, stockQty: stockQty || -1,
+            inStock: inStock !== false,
+            stockQty: stockQty === undefined || stockQty === null || stockQty === '' ? -1 : Number(stockQty),
             deliveryMethod: deliveryMethod || 'gift', sortOrder: count
         });
 
@@ -346,7 +425,7 @@ router.post('/products', async (req, res) => {
 });
 
 // Update product
-router.put('/products/:id', async (req, res) => {
+router.put('/products/:id', mongoIdParam, validate, async (req, res) => {
     try {
         const { title, price, categoryId, categorySlug, description, image, imgLabel, inStock, stockQty, isActive, deliveryMethod } = req.body;
         const updateData = {};
@@ -381,7 +460,7 @@ router.put('/products/:id', async (req, res) => {
 });
 
 // Toggle product active / in-stock
-router.put('/products/:id/toggle', async (req, res) => {
+router.put('/products/:id/toggle', mongoIdParam, validate, async (req, res) => {
     try {
         const { field } = req.body; // 'isActive', 'inStock', or 'isHot'
         if (!['isActive', 'inStock', 'isHot'].includes(field)) return res.status(400).json({ success: false, msg: 'field ไม่ถูกต้อง' });
@@ -399,11 +478,11 @@ router.put('/products/:id/toggle', async (req, res) => {
 });
 
 // Delete product
-router.delete('/products/:id', async (req, res) => {
+router.delete('/products/:id', mongoIdParam, validate, async (req, res) => {
     try {
+        const delProduct = await Product.findByIdAndDelete(req.params.id);
+        if (!delProduct) return res.status(404).json({ success: false, msg: 'ไม่พบสินค้า' });
         await Review.deleteMany({ product: req.params.id });
-        const delProduct = await Product.findById(req.params.id);
-        await Product.findByIdAndDelete(req.params.id);
 
         await logAction({
             req, user: req.user,
@@ -497,12 +576,26 @@ router.get('/topups/pending-count', async (req, res) => {
 });
 
 // Approve topup → add points to user
-router.put('/topups/:id/approve', async (req, res) => {
+router.put('/topups/:id/approve', mongoIdParam, validate, async (req, res) => {
     try {
-        const transaction = await Transaction.findById(req.params.id).populate('user', 'username email');
-        if (!transaction) return res.status(404).json({ success: false, msg: 'ไม่พบรายการ' });
-        if (transaction.type !== 'topup') return res.status(400).json({ success: false, msg: 'รายการนี้ไม่ใช่การเติมเงิน' });
-        if (transaction.status !== 'pending') return res.status(400).json({ success: false, msg: 'รายการนี้ดำเนินการแล้ว' });
+        // Claim only a pending topup. This prevents double approval under concurrency.
+        const transaction = await Transaction.findOneAndUpdate(
+            { _id: req.params.id, type: 'topup', status: 'pending' },
+            {
+                $set: {
+                    status: 'success',
+                    approvedBy: req.user._id,
+                    approvedAt: new Date(),
+                },
+            },
+            { new: true }
+        ).populate('user', 'username email');
+        if (!transaction) {
+            const existing = await Transaction.findById(req.params.id);
+            if (!existing) return res.status(404).json({ success: false, msg: 'ไม่พบรายการ' });
+            if (existing.type !== 'topup') return res.status(400).json({ success: false, msg: 'รายการนี้ไม่ใช่การเติมเงิน' });
+            return res.status(400).json({ success: false, msg: 'รายการนี้ดำเนินการแล้ว' });
+        }
 
         // Atomic add points
         const user = await User.findByIdAndUpdate(
@@ -510,13 +603,20 @@ router.put('/topups/:id/approve', async (req, res) => {
             { $inc: { points: transaction.amount } },
             { new: true }
         );
+        if (!user) {
+            await Transaction.updateOne(
+                { _id: transaction._id, status: 'success' },
+                { $set: { status: 'pending' }, $unset: { approvedBy: 1, approvedAt: 1 } }
+            );
+            return res.status(404).json({ success: false, msg: 'ไม่พบผู้ใช้' });
+        }
 
-        // Update transaction status
-        transaction.status = 'success';
-        transaction.note = `เติม ${transaction.amount} Point ผ่านโอนธนาคาร (Admin อนุมัติ)`;
-        transaction.approvedBy = req.user._id;
-        transaction.approvedAt = new Date();
-        await transaction.save();
+        // The approval is already complete. Updating the explanatory note is best-effort
+        // and must not turn a successful credit into a misleading retryable failure.
+        await Transaction.updateOne(
+            { _id: transaction._id },
+            { $set: { note: `เติม ${transaction.amount} Point ผ่านโอนธนาคาร (Admin อนุมัติ)` } }
+        ).catch((noteErr) => console.warn('Could not update topup note:', noteErr.message));
 
         // Log action
         await logAction({
@@ -539,7 +639,7 @@ router.put('/topups/:id/approve', async (req, res) => {
 });
 
 // Reject topup
-router.put('/topups/:id/reject', async (req, res) => {
+router.put('/topups/:id/reject', mongoIdParam, validate, async (req, res) => {
     try {
         const { reason } = req.body;
         const transaction = await Transaction.findById(req.params.id).populate('user', 'username email');
@@ -602,7 +702,7 @@ router.post('/banners', async (req, res) => {
 });
 
 // Update banner
-router.put('/banners/:id', async (req, res) => {
+router.put('/banners/:id', mongoIdParam, validate, async (req, res) => {
     try {
         // Whitelist allowed fields to prevent mass assignment
         const allowed = ['title', 'image', 'link', 'isActive', 'isHot', 'sortOrder'];
@@ -621,9 +721,10 @@ router.put('/banners/:id', async (req, res) => {
 });
 
 // Delete banner
-router.delete('/banners/:id', async (req, res) => {
+router.delete('/banners/:id', mongoIdParam, validate, async (req, res) => {
     try {
-        await Banner.findByIdAndDelete(req.params.id);
+        const banner = await Banner.findByIdAndDelete(req.params.id);
+        if (!banner) return res.status(404).json({ success: false, msg: 'ไม่พบ Banner' });
         res.json({ success: true, msg: 'ลบ Banner สำเร็จ' });
     } catch (err) {
         console.error('Admin error:', err.message);

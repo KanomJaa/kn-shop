@@ -13,9 +13,6 @@ const { checkoutLimiter } = require('../middleware/userRateLimit');
 
 // ==================== CHECKOUT (CREATE ORDER) with MongoDB Transaction (#3) ====================
 router.post('/checkout', auth, checkoutLimiter, checkoutRules, validate, async (req, res) => {
-    // Start MongoDB session for transaction safety
-    const session = await mongoose.startSession();
-
     try {
         const { items } = req.body;
 
@@ -54,6 +51,7 @@ router.post('/checkout', auth, checkoutLimiter, checkoutRules, validate, async (
 
         // ==================== BEGIN TRANSACTION ====================
         let updatedUser, order;
+        const session = await mongoose.startSession();
 
         try {
             session.startTransaction();
@@ -91,15 +89,38 @@ router.post('/checkout', auth, checkoutLimiter, checkoutRules, validate, async (
 
             // Deduct stock atomically
             for (const item of orderItems) {
-                const updateOps = { $inc: { soldCount: item.qty } };
                 const product = await Product.findById(item.product).session(session);
-                if (product && product.stockQty !== -1) {
-                    updateOps.$inc.stockQty = -item.qty;
-                    if (product.stockQty - item.qty <= 0) {
-                        updateOps.$set = { inStock: false };
-                    }
+                if (!product) {
+                    const stockError = new Error(`ไม่พบสินค้า "${item.title}"`);
+                    stockError.code = 'STOCK_CHANGED';
+                    throw stockError;
                 }
-                await Product.findByIdAndUpdate(item.product, updateOps, { session });
+                if (product.stockQty !== -1) {
+                    const updatedProduct = await Product.findOneAndUpdate(
+                        {
+                            _id: item.product,
+                            isActive: true,
+                            inStock: true,
+                            stockQty: { $gte: item.qty },
+                        },
+                        {
+                            $inc: { stockQty: -item.qty, soldCount: item.qty },
+                            ...(product.stockQty === item.qty ? { $set: { inStock: false } } : {}),
+                        },
+                        { new: true, session }
+                    );
+                    if (!updatedProduct) {
+                        const stockError = new Error(`สินค้า "${item.title}" มีสต็อกไม่เพียงพอ`);
+                        stockError.code = 'STOCK_CHANGED';
+                        throw stockError;
+                    }
+                } else {
+                    await Product.findByIdAndUpdate(
+                        item.product,
+                        { $inc: { soldCount: item.qty } },
+                        { session }
+                    );
+                }
             }
 
             await session.commitTransaction();
@@ -119,30 +140,75 @@ router.post('/checkout', auth, checkoutLimiter, checkoutRules, validate, async (
                 );
                 if (!updatedUser) return res.status(400).json({ success: false, msg: 'ไม่สามารถหัก Point ได้' });
 
-                const todayFb = new Date();
-                todayFb.setHours(0, 0, 0, 0);
-                const todayOrdersFb = await Order.countDocuments({ createdAt: { $gte: todayFb } });
+                const reservedStock = [];
+                let fallbackOrder = null;
+                try {
+                    for (const item of orderItems) {
+                        const product = await Product.findById(item.product);
+                        if (!product) throw new Error(`ไม่พบสินค้า "${item.title}"`);
 
-                order = await Order.create({
-                    user: user._id, username: user.username,
-                    items: orderItems, totalPoints, queueNumber: todayOrdersFb + 1,
-                });
+                        if (product.stockQty === -1) {
+                            await Product.findByIdAndUpdate(item.product, { $inc: { soldCount: item.qty } });
+                            reservedStock.push({ productId: item.product, qty: item.qty, unlimited: true });
+                            continue;
+                        }
 
-                await Transaction.create({
-                    user: user._id, type: 'purchase',
-                    amount: -totalPoints, orderId: order.orderId,
-                    note: `สั่งซื้อ ${orderItems.length} รายการ`
-                });
-
-                for (const item of orderItems) {
-                    const updateOps = { $inc: { soldCount: item.qty } };
-                    const prod = await Product.findById(item.product);
-                    if (prod && prod.stockQty !== -1) {
-                        updateOps.$inc.stockQty = -item.qty;
-                        if (prod.stockQty - item.qty <= 0) updateOps.$set = { inStock: false };
+                        const updatedProduct = await Product.findOneAndUpdate(
+                            {
+                                _id: item.product,
+                                isActive: true,
+                                inStock: true,
+                                stockQty: { $gte: item.qty },
+                            },
+                            {
+                                $inc: { stockQty: -item.qty, soldCount: item.qty },
+                                ...(product.stockQty === item.qty ? { $set: { inStock: false } } : {}),
+                            },
+                            { new: true }
+                        );
+                        if (!updatedProduct) {
+                            const stockError = new Error(`สินค้า "${item.title}" มีสต็อกไม่เพียงพอ`);
+                            stockError.code = 'STOCK_CHANGED';
+                            throw stockError;
+                        }
+                        reservedStock.push({ productId: item.product, qty: item.qty, unlimited: false });
                     }
-                    await Product.findByIdAndUpdate(item.product, updateOps);
+
+                    const todayFb = new Date();
+                    todayFb.setHours(0, 0, 0, 0);
+                    const todayOrdersFb = await Order.countDocuments({ createdAt: { $gte: todayFb } });
+
+                    fallbackOrder = await Order.create({
+                        user: user._id, username: user.username,
+                        items: orderItems, totalPoints, queueNumber: todayOrdersFb + 1,
+                    });
+
+                    await Transaction.create({
+                        user: user._id, type: 'purchase',
+                        amount: -totalPoints, orderId: fallbackOrder.orderId,
+                        note: `สั่งซื้อ ${orderItems.length} รายการ`
+                    });
+                    order = fallbackOrder;
+                } catch (fallbackErr) {
+                    // Best-effort compensation for standalone MongoDB, where true transactions
+                    // are unavailable. This covers stock, points, and a partially created order.
+                    const rollbackTasks = [
+                        User.findByIdAndUpdate(user._id, { $inc: { points: totalPoints } }),
+                        ...reservedStock.map((reserved) => Product.findByIdAndUpdate(
+                            reserved.productId,
+                            reserved.unlimited
+                                ? { $inc: { soldCount: -reserved.qty } }
+                                : { $inc: { stockQty: reserved.qty, soldCount: -reserved.qty }, $set: { inStock: true } }
+                        )),
+                    ];
+                    if (fallbackOrder) rollbackTasks.push(Order.deleteOne({ _id: fallbackOrder._id }));
+                    const rollbackResults = await Promise.allSettled(rollbackTasks);
+                    if (rollbackResults.some((result) => result.status === 'rejected')) {
+                        console.error('Checkout compensation was only partially successful');
+                    }
+                    throw fallbackErr;
                 }
+
             } else {
                 throw txErr;
             }
@@ -169,6 +235,9 @@ router.post('/checkout', auth, checkoutLimiter, checkoutRules, validate, async (
         });
     } catch (err) {
         console.error('Checkout error:', err.message);
+        if (err.code === 'STOCK_CHANGED') {
+            return res.status(409).json({ success: false, msg: err.message });
+        }
         res.status(500).json({ success: false, msg: 'เกิดข้อผิดพลาด' });
     }
 });

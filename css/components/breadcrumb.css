@@ -1,0 +1,88 @@
+/* ==================== BREADCRUMB NAVIGATION ==================== */
+.breadcrumb {
+    background: linear-gradient(135deg, #f5f9ff 0%, #e8f4fd 100%);
+    border-bottom: 1px solid #e0ecf5;
+    padding: 12px 0;
+}
+
+.breadcrumb .container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+}
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: 0;
+}
+
+.breadcrumb-list li {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #888;
+}
+
+.breadcrumb-list li a {
+    color: #0288d1;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.breadcrumb-list li a:hover {
+    background: rgba(2, 136, 209, 0.1);
+    color: #01579b;
+    transform: translateY(-1px);
+}
+
+.breadcrumb-list li a i {
+    font-size: 12px;
+}
+
+.breadcrumb-list li .breadcrumb-separator {
+    margin: 0 4px;
+    color: #bbb;
+    font-size: 10px;
+    user-select: none;
+}
+
+.breadcrumb-list li.active {
+    color: #555;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.breadcrumb-list li.active span {
+    padding: 4px 8px;
+}
+
+@media (max-width: 768px) {
+    .breadcrumb {
+        padding: 10px 0;
+    }
+
+    .breadcrumb-list li {
+        font-size: 12px;
+    }
+
+    .breadcrumb-list li a {
+        padding: 3px 5px;
+        gap: 3px;
+    }
+
+    .breadcrumb-list li .breadcrumb-separator {
+        margin: 0 2px;
+    }
+}

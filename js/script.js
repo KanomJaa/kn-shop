@@ -43,20 +43,26 @@ function renderRecommendedGames(categories) {
     grid.innerHTML = gameCategories.map(c => {
         const hasImage = c.image && c.image.length > 0;
         const stockText = c.totalStock > 0 ? `${c.totalStock.toLocaleString()} ชิ้น` : 'ไม่จำกัด';
+        const name = KNShop.escapeHTML(c.name);
+        const description = KNShop.escapeHTML(c.description || 'ดูสินค้าทั้งหมด');
+        const icon = KNShop.escapeHTML(c.icon || 'fa-solid fa-gamepad');
+        const image = KNShop.safeUrl(c.image);
+        const slug = encodeURIComponent(c.slug || '');
+        const headerColor = /^#[0-9a-f]{3,8}$/i.test(c.headerColor || '') ? c.headerColor : '#0288d1';
 
         return `
-        <div class="gp-card" style="--card-color: ${c.headerColor || '#0288d1'}">
+        <div class="gp-card" style="--card-color: ${headerColor}">
             ${c.isHot ? '<div class="gp-hot-badge"><i class="fa-solid fa-fire"></i> HOT</div>' : ''}
             <div class="gp-card-image">
-                ${hasImage
-                ? `<img src="${c.image}" alt="${c.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                       <div class="gp-card-icon-fallback" style="display:none;"><i class="${c.icon}"></i></div>`
-                : `<div class="gp-card-icon-fallback"><i class="${c.icon}"></i></div>`
+                ${hasImage && image
+                ? `<img src="${KNShop.escapeHTML(image)}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="gp-card-icon-fallback" style="display:none;"><i class="${icon}"></i></div>`
+                : `<div class="gp-card-icon-fallback"><i class="${icon}"></i></div>`
             }
             </div>
             <div class="gp-card-body">
-                <h3 class="gp-card-title">${c.name}</h3>
-                <p class="gp-card-desc">${c.description || 'ดูสินค้าทั้งหมด'}</p>
+                <h3 class="gp-card-title">${name}</h3>
+                <p class="gp-card-desc">${description}</p>
                 <div class="gp-card-stats">
                     <span><i class="fa-solid fa-box"></i> ${c.productCount || 0} สินค้า</span>
                     <span><i class="fa-solid fa-fire-flame-curved"></i> ขายแล้ว ${(c.totalSold || 0).toLocaleString()} ชิ้น</span>
@@ -64,102 +70,13 @@ function renderRecommendedGames(categories) {
                 <div class="gp-card-stock">
                     <span><i class="fa-solid fa-warehouse"></i> สต๊อก: ${stockText}</span>
                 </div>
-                <a href="/pages/products.html?cat=${c.slug}" class="gp-card-btn">
+                <a href="/pages/products.html?cat=${slug}" class="gp-card-btn">
                     <i class="fa-solid fa-store"></i> ดูสินค้า
                 </a>
             </div>
         </div>
         `;
     }).join('');
-}
-
-// ==================== BANNER POPUP (Homepage) ====================
-let homeBanners = [];
-let homeCurrentBanner = 0;
-
-function initHomeBannerPopup(banners) {
-    homeBanners = banners;
-
-    // Create banner popup dynamically if not exist
-    if (!document.getElementById('bannerPopup')) {
-        const popupHTML = `
-        <div class="banner-popup-overlay" id="bannerPopup" onclick="closeBannerPopup()">
-            <div class="banner-popup-box" onclick="event.stopPropagation()">
-                <button class="banner-close-btn" onclick="closeBannerPopup()"><i class="fa-solid fa-xmark"></i></button>
-                <div class="banner-slider" id="bannerSlider">
-                    <div class="banner-slide-container" id="bannerSlideContainer"></div>
-                    <button class="banner-arrow banner-prev" id="bannerPrev"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="banner-arrow banner-next" id="bannerNext"><i class="fa-solid fa-chevron-right"></i></button>
-                    <div class="banner-dots" id="bannerDots"></div>
-                </div>
-            </div>
-        </div>`;
-        document.body.insertAdjacentHTML('beforeend', popupHTML);
-    }
-
-    renderHomeBannerSlider();
-
-    // Show popup with 5-minute cooldown
-    const lastDismissed = localStorage.getItem('bannerDismissedAt');
-    const cooldownMs = 5 * 60 * 1000; // 5 minutes
-    const now = Date.now();
-    const canShow = !lastDismissed || (now - parseInt(lastDismissed)) > cooldownMs;
-
-    if (canShow) {
-        setTimeout(() => {
-            const popup = document.getElementById('bannerPopup');
-            if (popup) popup.classList.add('active');
-        }, 1000);
-    }
-}
-
-function renderHomeBannerSlider() {
-    const container = document.getElementById('bannerSlideContainer');
-    const dots = document.getElementById('bannerDots');
-    if (!container || !dots) return;
-
-    container.innerHTML = homeBanners.map((b, i) => `
-        <div class="banner-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
-            ${b.isHot ? '<div class="slide-hot-tag"><i class="fa-solid fa-fire"></i> HOT</div>' : ''}
-            ${b.link ? `<a href="${b.link}" target="_blank">` : ''}
-            <img src="${b.image}" alt="${b.title || 'Banner'}" onerror="this.style.display='none'">
-            ${b.link ? '</a>' : ''}
-            ${b.title ? `<div class="slide-title">${b.title}</div>` : ''}
-        </div>
-    `).join('');
-
-    dots.innerHTML = homeBanners.map((_, i) =>
-        `<span class="banner-dot ${i === 0 ? 'active' : ''}" onclick="goToHomeBanner(${i})"></span>`
-    ).join('');
-
-    if (homeBanners.length <= 1) {
-        document.getElementById('bannerPrev').style.display = 'none';
-        document.getElementById('bannerNext').style.display = 'none';
-        dots.style.display = 'none';
-    }
-
-    document.getElementById('bannerPrev')?.addEventListener('click', () => {
-        goToHomeBanner(homeCurrentBanner <= 0 ? homeBanners.length - 1 : homeCurrentBanner - 1);
-    });
-    document.getElementById('bannerNext')?.addEventListener('click', () => {
-        goToHomeBanner(homeCurrentBanner >= homeBanners.length - 1 ? 0 : homeCurrentBanner + 1);
-    });
-}
-
-function goToHomeBanner(index) {
-    const slides = document.querySelectorAll('.banner-slide');
-    const dots = document.querySelectorAll('.banner-dot');
-    slides.forEach(s => s.classList.remove('active'));
-    dots.forEach(d => d.classList.remove('active'));
-    homeCurrentBanner = index;
-    if (slides[index]) slides[index].classList.add('active');
-    if (dots[index]) dots[index].classList.add('active');
-}
-
-function closeBannerPopup() {
-    const popup = document.getElementById('bannerPopup');
-    if (popup) popup.classList.remove('active');
-    localStorage.setItem('bannerDismissedAt', Date.now().toString());
 }
 
 // ==================== UPDATE STATS (REAL DATA) ====================

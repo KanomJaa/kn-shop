@@ -1,0 +1,134 @@
+/* Forms */
+.auth-container,
+.topup-container {
+    max-width: 450px;
+    margin: 80px auto;
+    background: white;
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.auth-container h2,
+.topup-container h2 {
+    color: var(--secondary-color);
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(3, 169, 244, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background: var(--secondary-color);
+}
+
+.social-login {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    gap: 10px;
+}
+
+.btn-fb {
+    background-color: #3b5998;
+}
+
+.btn-google {
+    background-color: #db4437;
+}
+
+.auth-link {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #777;
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Topup Page */
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.payment-method {
+    border: 2px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.payment-method:hover,
+.payment-method.active {
+    border-color: var(--primary-color);
+    background-color: var(--accent-color);
+}
+
+.payment-method i {
+    font-size: 24px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.payment-method span {
+    display: block;
+    font-size: 12px;
+}
+

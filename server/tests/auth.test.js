@@ -250,3 +250,12 @@ describe('OAuth configuration fallback', () => {
         expect(res.headers.location).toBe('/pages/login.html?error=facebook_unavailable');
     });
 });
+
+describe('Email verification redirects', () => {
+    it('redirects an invalid token to the actual login page', async () => {
+        const res = await request(app).get('/api/auth/verify-email?token=invalid');
+
+        expect(res.status).toBe(302);
+        expect(res.headers.location).toBe('/pages/login.html?error=verify_expired');
+    });
+});

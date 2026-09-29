@@ -31,8 +31,7 @@ const createTransporter = () => {
         });
     }
 
-    // Fallback: ใช้ Ethereal (สำหรับ dev/test — ไม่ส่งอีเมลจริง)
-    console.warn('⚠️ No email service configured. Using Ethereal (test only).');
+    // The caller decides whether to use a local/test transport or fail closed.
     return null;
 };
 
@@ -44,7 +43,20 @@ const getTransporter = async () => {
     transporter = createTransporter();
     if (transporter) return transporter;
 
-    // Create Ethereal test account
+    // Tests must be deterministic and must never contact an external mail service.
+    if (process.env.NODE_ENV === 'test') {
+        transporter = nodemailer.createTransport({ jsonTransport: true });
+        return transporter;
+    }
+
+    // In production, silently sending to Ethereal would make verification/OTP
+    // emails inaccessible to real users. Require an explicitly configured service.
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('Email service is not configured');
+    }
+
+    // Development-only fallback: create an Ethereal preview mailbox.
+    console.warn('⚠️ No email service configured. Using Ethereal preview mailbox.');
     const testAccount = await nodemailer.createTestAccount();
     transporter = nodemailer.createTransport({
         host: 'smtp.ethereal.email',

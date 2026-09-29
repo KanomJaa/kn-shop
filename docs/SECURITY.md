@@ -58,7 +58,7 @@
 
 ### 5. ✅ Rate Limiting (IP-based)
 - **เทคโนโลยี:** express-rate-limit
-- **ไฟล์:** `server/server.js`
+- **ไฟล์:** `server/app.js`
 - **กฎ:**
   | Endpoint | Limit |
   |----------|-------|
@@ -138,7 +138,7 @@
 
 ### 11. ✅ Helmet (Security Headers)
 - **เทคโนโลยี:** helmet.js
-- **ไฟล์:** `server/server.js`
+- **ไฟล์:** `server/app.js`
 - **Headers ที่ตั้งค่า:**
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: SAMEORIGIN`
@@ -222,7 +222,7 @@
   - ป้องกัน DDoS
 
 ### 23. ✅ SSL/HTTPS
-- **ไฟล์:** `server/server.js`
+- **ไฟล์:** `server/bootstrap/startServer.js`
 - **การตั้งค่า:**
   ```env
   SSL_ENABLED=true

@@ -1,5 +1,7 @@
 # 🎮 KN Shop — สรุปโปรเจคทั้งหมด
 
+> เอกสารนี้เป็นภาพรวมเดิมและอาจไม่ตรงกับโครงสร้างล่าสุดทั้งหมด โปรดใช้ `README.md`, `docs/ARCHITECTURE.md` และ `docs/MAINTENANCE.md` เป็นแหล่งอ้างอิงหลัก
+
 > **เว็บไซต์จำหน่ายไอเทมและบริการเกม Roblox ครบวงจร**  
 > พัฒนาด้วย HTML/CSS/JavaScript + Node.js + MongoDB
 

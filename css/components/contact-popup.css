@@ -1,0 +1,296 @@
+/* ========== FLOATING CHAT BUTTON & POPUP ========== */
+.chat-float-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: white;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    z-index: 9990;
+    box-shadow: 0 6px 25px rgba(76, 175, 80, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    animation: chatPulse 2s infinite;
+}
+
+.chat-float-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 30px rgba(76, 175, 80, 0.6);
+    animation: none;
+}
+
+@keyframes chatPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 6px 25px rgba(76, 175, 80, 0.45);
+    }
+
+    50% {
+        box-shadow: 0 6px 35px rgba(76, 175, 80, 0.7);
+    }
+}
+
+.contact-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 9995;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.contact-popup-overlay.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.contact-popup {
+    background: white;
+    border-radius: 20px;
+    padding: 0;
+    max-width: 400px;
+    width: 92%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: popupSlide 0.3s ease;
+}
+
+@keyframes popupSlide {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.contact-popup-header {
+    background: linear-gradient(135deg, #0288d1, #03a9f4);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-popup-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-popup-close,
+.contact-close-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.contact-popup-close:hover,
+.contact-close-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: rotate(90deg);
+}
+
+.contact-popup-body {
+    padding: 20px 24px 28px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+    color: #333;
+}
+
+.contact-item:hover {
+    transform: translateX(4px);
+}
+
+.contact-item:last-child {
+    margin-bottom: 0;
+}
+
+.contact-item .ci-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.contact-item .ci-icon.fb {
+    background: linear-gradient(135deg, #1877f2, #3b5998);
+}
+
+.contact-item .ci-icon.dc {
+    background: linear-gradient(135deg, #5865f2, #7289da);
+}
+
+.contact-item .ci-icon.line {
+    background: linear-gradient(135deg, #00b900, #06c755);
+}
+
+.contact-item .ci-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.contact-item .ci-info p {
+    font-size: 12px;
+    color: #999;
+}
+
+.contact-item:nth-child(1) {
+    background: #eef3ff;
+}
+
+.contact-item:nth-child(1):hover {
+    background: #dde8ff;
+}
+
+.contact-item:nth-child(2) {
+    background: #eef0ff;
+}
+
+.contact-item:nth-child(2):hover {
+    background: #dde0ff;
+}
+
+.contact-item:nth-child(3) {
+    background: #e8f5e9;
+}
+
+.contact-item:nth-child(3):hover {
+    background: #c8e6c9;
+}
+
+/* Line QR Popup */
+.line-qr-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9998;
+    justify-content: center;
+    align-items: center;
+}
+
+.line-qr-overlay.active {
+    display: flex;
+}
+
+.line-qr-box {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: popupSlide 0.3s ease;
+}
+
+.line-qr-box img {
+    width: 220px;
+    height: 220px;
+    border-radius: 12px;
+    margin: 16px auto;
+    display: block;
+}
+
+.line-qr-box .line-id {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.line-qr-box .close-qr {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 24px;
+    background: #ef5350;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.line-qr-box .close-qr:hover {
+    background: #c62828;
+}
+
+@media (max-width: 480px) {
+    .chat-float-btn {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        bottom: 20px;
+        right: 16px;
+    }
+
+    .contact-popup {
+        width: 95%;
+    }
+}
+

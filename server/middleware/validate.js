@@ -31,7 +31,7 @@ const registerRules = [
         .isEmail().withMessage('รูปแบบอีเมลไม่ถูกต้อง')
         .normalizeEmail(),
     body('password')
-        .isLength({ min: 6 }).withMessage('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'),
+        .isLength({ min: 6, max: 128 }).withMessage('รหัสผ่านต้องมี 6-128 ตัวอักษร'),
 ];
 
 const loginRules = [
@@ -45,7 +45,7 @@ const loginRules = [
 const changePasswordRules = [
     body('currentPassword').notEmpty().withMessage('กรุณากรอกรหัสผ่านปัจจุบัน'),
     body('newPassword')
-        .isLength({ min: 6 }).withMessage('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร'),
+        .isLength({ min: 6, max: 128 }).withMessage('รหัสผ่านใหม่ต้องมี 6-128 ตัวอักษร'),
 ];
 
 const forgotPasswordRules = [
@@ -56,7 +56,7 @@ const forgotPasswordRules = [
 ];
 
 const verifyOtpRules = [
-    body('email').trim().isEmail().withMessage('รูปแบบอีเมลไม่ถูกต้อง'),
+    body('email').trim().isEmail().withMessage('รูปแบบอีเมลไม่ถูกต้อง').normalizeEmail(),
     body('code')
         .trim()
         .isLength({ min: 6, max: 6 }).withMessage('รหัส OTP ต้องเป็นตัวเลข 6 หลัก')
@@ -64,10 +64,10 @@ const verifyOtpRules = [
 ];
 
 const resetPasswordRules = [
-    body('email').trim().isEmail().withMessage('รูปแบบอีเมลไม่ถูกต้อง'),
+    body('email').trim().isEmail().withMessage('รูปแบบอีเมลไม่ถูกต้อง').normalizeEmail(),
     body('resetToken').notEmpty().withMessage('ไม่พบ Reset Token'),
     body('newPassword')
-        .isLength({ min: 6 }).withMessage('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร'),
+        .isLength({ min: 6, max: 128 }).withMessage('รหัสผ่านใหม่ต้องมี 6-128 ตัวอักษร'),
 ];
 
 // ==================== ORDER VALIDATIONS ====================
@@ -78,13 +78,20 @@ const checkoutRules = [
         .notEmpty().withMessage('ข้อมูลสินค้าไม่ครบ')
         .isMongoId().withMessage('รหัสสินค้าไม่ถูกต้อง'),
     body('items.*.qty')
-        .isInt({ min: 1, max: 100 }).withMessage('จำนวนสินค้าต้องอยู่ระหว่าง 1-100'),
+        .isInt({ min: 1, max: 100 }).withMessage('จำนวนสินค้าต้องอยู่ระหว่าง 1-100')
+        .toInt(),
+    body('items.*.robloxUsername')
+        .optional({ checkFalsy: true })
+        .trim()
+        .isLength({ max: 50 }).withMessage('Roblox Username ยาวเกินไป')
+        .matches(/^[a-zA-Z0-9_]+$/).withMessage('Roblox Username ไม่ถูกต้อง'),
 ];
 
 // ==================== PAYMENT VALIDATIONS ====================
 const topupRules = [
     body('amount')
-        .isInt({ min: 1, max: 100000 }).withMessage('จำนวนเงินต้องอยู่ระหว่าง 1-100,000'),
+        .isInt({ min: 1, max: 100000 }).withMessage('จำนวนเงินต้องอยู่ระหว่าง 1-100,000')
+        .toInt(),
     body('method')
         .notEmpty().withMessage('เลือกวิธีชำระเงิน')
         .isIn(['bank']).withMessage('ช่องทางนี้ไม่รองรับ'),
@@ -96,24 +103,38 @@ const topupRules = [
 const adminPointsRules = [
     param('id').isMongoId().withMessage('รหัสผู้ใช้ไม่ถูกต้อง'),
     body('amount')
-        .isInt().withMessage('จำนวนต้องเป็นตัวเลข')
+        .isInt({ min: -1000000, max: 1000000 }).withMessage('จำนวนต้องเป็นเลขระหว่าง -1,000,000 ถึง 1,000,000')
+        .toInt()
         .custom(val => val !== 0).withMessage('จำนวนต้องไม่เท่ากับ 0'),
 ];
 
 const adminProductRules = [
     body('title').trim().notEmpty().withMessage('กรุณากรอกชื่อสินค้า'),
     body('price')
-        .isInt({ min: 0 }).withMessage('ราคาต้องเป็นจำนวนเต็ม 0 ขึ้นไป'),
+        .isInt({ min: 0, max: 10000000 }).withMessage('ราคาต้องเป็นจำนวนเต็ม 0-10,000,000')
+        .toInt(),
     body('categoryId')
         .notEmpty().withMessage('เลือกหมวดหมู่')
         .isMongoId().withMessage('รหัสหมวดหมู่ไม่ถูกต้อง'),
     body('categorySlug')
-        .notEmpty().withMessage('กรุณาระบุ slug หมวดหมู่'),
+        .trim()
+        .notEmpty().withMessage('กรุณาระบุ slug หมวดหมู่')
+        .matches(/^[a-z0-9-]+$/).withMessage('slug ใช้ได้เฉพาะ a-z, 0-9 และ -'),
+    body('stockQty')
+        .optional({ nullable: true, checkFalsy: true })
+        .isInt({ min: -1, max: 10000000 }).withMessage('สต็อกต้องเป็น -1 หรือจำนวนเต็มบวก')
+        .toInt(),
+    body('deliveryMethod')
+        .optional()
+        .isIn(['gift', 'trade', 'drop', 'service']).withMessage('วิธีส่งสินค้าไม่ถูกต้อง'),
 ];
 
 const adminCategoryRules = [
     body('name').trim().notEmpty().withMessage('กรุณากรอกชื่อหมวดหมู่'),
-    body('slug').trim().notEmpty().withMessage('กรุณากรอก slug'),
+    body('slug')
+        .trim()
+        .notEmpty().withMessage('กรุณากรอก slug')
+        .matches(/^[a-z0-9-]+$/).withMessage('slug ใช้ได้เฉพาะ a-z, 0-9 และ -'),
 ];
 
 const mongoIdParam = [
